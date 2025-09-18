@@ -1,70 +1,52 @@
-# task-m-aiii
+# Task Manager
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, Fastify, and more.
+Este é um side-project para gerenciar minhas tarefas pessoais e do trabalho.
 
-## Features
+A ideia é que seja bem simples, com poucos requisitos por enquanto.
 
-- **TypeScript** - For type safety and improved developer experience
-- **Next.js** - Full-stack React framework
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
-- **Fastify** - Fast, low-overhead web framework
-- **Node.js** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
-- **Biome** - Linting and formatting
-- **Turborepo** - Optimized monorepo build system
+---
 
-## Getting Started
+### **1. Requisitos Funcionais**
 
-First, install the dependencies:
+**(a) Organização das tarefas**
 
-```bash
-pnpm install
-```
-## Database Setup
+- Adicionar, editar e remover tarefas.
+- Marcar tarefas como concluídas ou pendentes.
+- Reorganizar tarefas (drag & drop ou ordenação manual).
 
-This project uses PostgreSQL with Drizzle ORM.
+**(b) Separação por períodos**
 
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
+- Filtrar e visualizar tarefas por **dia**, **semana** e **mês**.
+- Criar tarefas recorrentes (diárias, semanais ou mensais).
 
-3. Apply the schema to your database:
-```bash
-pnpm db:push
-```
+**(c) Categorias**
+
+- Criar categorias ou tags para tarefas (ex.: trabalho, pessoal, estudo).
+- Filtrar tarefas por categoria.
+
+**(d) Priorização**
+
+- Definir prioridade (ex.: alta, média, baixa) para cada tarefa.
+- Ordenar tarefas por prioridade.
+
+**(e) Lembretes e notificações**
+
+- Configurar lembretes para tarefas específicas.
+- Receber notificações para tarefas próximas do prazo.
+
+**(f) Pesquisa e filtro**
+
+- Buscar tarefas por título ou descrição.
+- Filtrar tarefas por status (pendente/concluída), categoria, prioridade ou período.
+
+---
+
+### **2. Requisitos Não Funcionais**
+
+- Interface simples e intuitiva.
+- Responsivo para múltiplos dispositivos (mobile e desktop).
+- Armazenamento seguro das tarefas (local ou na nuvem).
+- Performance rápida na visualização e organização das tarefas.
 
 
-Then, run the development server:
-
-```bash
-pnpm dev
-```
-
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-The API is running at [http://localhost:3000](http://localhost:3000).
-
-
-
-
-
-## Project Structure
-
-```
-task-m-aiii/
-├── apps/
-│   ├── web/         # Frontend application (Next.js)
-│   └── server/      # Backend API (Fastify)
-```
-
-## Available Scripts
-
-- `pnpm dev`: Start all applications in development mode
-- `pnpm build`: Build all applications
-- `pnpm dev:web`: Start only the web application
-- `pnpm dev:server`: Start only the server
-- `pnpm check-types`: Check TypeScript types across all apps
-- `pnpm db:push`: Push schema changes to database
-- `pnpm db:studio`: Open database studio UI
-- `pnpm check`: Run Biome formatting and linting
+***Diagrama ERD***
