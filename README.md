@@ -50,3 +50,4 @@ A ideia é que seja bem simples, com poucos requisitos por enquanto.
 
 
 ***Diagrama ERD***
+<img width="1168" height="631" alt="image" src="https://github.com/user-attachments/assets/db2f2e1f-f535-4ba9-b59c-411acb46c589" />
