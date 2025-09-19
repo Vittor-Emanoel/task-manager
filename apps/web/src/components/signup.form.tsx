@@ -88,7 +88,7 @@ export const SignupForm = () => {
              	<form.Field name="name">
         				{(field) => (
        					<div className="space-y-2">
-        					<Label htmlFor={field.name}>Name</Label>
+        					<Label htmlFor={field.name}>Nome</Label>
         				  <Input
                     type="text"
                     placeholder="Digite seu nome"
@@ -111,10 +111,10 @@ export const SignupForm = () => {
            	<form.Field name="email">
       				{(field) => (
      					<div className="space-y-2">
-      						<Label htmlFor={field.name}>Name</Label>
+      						<Label htmlFor={field.name}>Email</Label>
       				    <Input
                     type="text"
-                    placeholder="Digite seu nome"
+                    placeholder="Digite seu email"
                    	id={field.name}
        							name={field.name}
        							value={field.state.value}
@@ -133,7 +133,7 @@ export const SignupForm = () => {
            	<form.Field name="password">
       				{(field) => (
      					<div className="space-y-2">
-      						<Label htmlFor={field.name}>Name</Label>
+      						<Label htmlFor={field.name}>Senha</Label>
                   <Input
                     id={field.name}
                     placeholder="Digite sua senha"
