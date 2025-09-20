@@ -1,17 +1,17 @@
-name: task-m-aiii
+name: task-manager-ai
 
 services:
   postgres:
     image: postgres
-    container_name: task-m-aiii-postgres
+    container_name: task-manager-ai-postgres
     environment:
-      POSTGRES_DB: task-m-aiii
+      POSTGRES_DB: task-manager-ai
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     volumes:
-      - task-m-aiii_postgres_data:/var/lib/postgresql/data
+      - task-manager-ai_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -20,4 +20,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  task-m-aiii_postgres_data:
+  task-manager-ai_postgres_data:
