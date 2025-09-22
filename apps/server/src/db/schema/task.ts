@@ -4,6 +4,7 @@ import {
   pgEnum,
   pgTable,
   text,
+  time,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -19,6 +20,15 @@ export const taskPriorityLevelEnum = pgEnum("priorityLevel", [
   "high",
   "medium",
   "low",
+]);
+
+export const taskTypeEnum = pgEnum("task_type", ["single", "recurring"]);
+
+export const recurringPatternEnum = pgEnum("recurring_pattern", [
+  "daily",
+  "weekly",
+  "monthly",
+  "yearly",
 ]);
 
 export const category = pgTable("category", {
@@ -37,6 +47,16 @@ export const task = pgTable("task", {
   priorityLevel: taskPriorityLevelEnum()
     .notNull()
     .$default(() => "low"),
+  taskType: taskTypeEnum()
+    .$default(() => "single")
+    .notNull(),
+  scheduledDate: timestamp("scheduled_date"),
+  scheduledTime: time("scheduled_time"),
+  recurringPattern: recurringPatternEnum(),
+  recurringInterval: integer("recurring_interval"),
+  recurringDaysOfWeek: text("recurring_days_of_week"),
+  recurringDayOfMonth: integer("recurring_day_of_month"),
+  recurringEndDate: timestamp("recurring_end_date"),
   recurrentQuantity: integer("recurrent_quantity"),
   recurrentType: integer("recurrent_type"),
   finishedAt: timestamp("finished_at"),

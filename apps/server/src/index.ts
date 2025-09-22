@@ -2,6 +2,8 @@ import fastifyCors from "@fastify/cors";
 import "dotenv/config";
 import Fastify from "fastify";
 
+import { db } from "./db";
+import { task } from "./db/schema/task";
 import { auth } from "./lib/auth";
 
 const baseCorsConfig = {
@@ -17,6 +19,30 @@ const fastify = Fastify({
 });
 
 fastify.register(fastifyCors, baseCorsConfig);
+
+fastify.post("/tasks", async (request, reply) => {
+  const { title, description, recurrentQuantity, recurrentType } = request.body;
+
+  const userId = request.user?.id;
+
+  const newTask = {
+    id: crypto.randomUUID(),
+    title,
+    description: description || null,
+    status: "pending",
+    priorityLevel: "low",
+    recurrentQuantity: recurrentQuantity || null,
+    recurrentType: recurrentType ? parseInt(recurrentType) : null,
+    createdAt: new Date(),
+    finishedAt: null,
+    userId,
+    categoryId: null,
+  };
+
+  const taskAdd = await db.insert(task).values(newTask).returning();
+
+  return reply.code(201).send(taskAdd[0]);
+});
 
 fastify.route({
   method: ["GET", "POST"],
