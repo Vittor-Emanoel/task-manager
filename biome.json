@@ -37,7 +37,8 @@
 			"recommended": true,
 			"correctness": {
 				"useExhaustiveDependencies": "info",
-				"noChildrenProp": "off"
+				"noChildrenProp": "off",
+				"noStaticOnlyClass": "off"
 			},
 			"nursery": {
 				"useSortedClasses": {
