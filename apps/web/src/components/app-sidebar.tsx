@@ -2,12 +2,7 @@
 
 import {
 	Bell,
-	Calendar,
-	Command,
-	Inbox,
-	Plus,
-	Search,
-	Sparkles,
+	Plus
 } from "lucide-react";
 import type * as React from "react";
 
@@ -24,12 +19,13 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { CreateTaskModal } from "./createTaskModal";
+import { Logo } from "./logo";
 
 const data = {
 	user: {
-		name: "shadcn",
-		email: "m@example.com",
-		avatar: "/avatars/shadcn.jpg",
+		name: "vittor",
+		email: "vittor@example.com",
+		avatar: "http://github.com/Vittor-Emanoel.png",
 	},
 };
 
@@ -41,13 +37,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					<SidebarMenuItem>
 						<SidebarMenuButton size="lg" asChild>
 							<div>
-								<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-									<Command className="size-4" />
+								<div className="flex aspect-square size-8 items-center justify-center rounded-lg text-sidebar-primary-foreground">
+									<Logo className="size-6" />
 								</div>
 
 								<div className="grid flex-1 text-left text-sm leading-tight">
 									<span className="truncate font-medium">Task.ai</span>
-									<span className="truncate text-xs">
+									<span className="truncate text-xs text-zinc-400">
 										Gerencie suas tarefas
 									</span>
 								</div>
@@ -63,16 +59,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 						<SidebarMenu>
 							<SidebarMenuItem>
 								<CreateTaskModal>
-									<SidebarMenuButton asChild size="sm">
+									<SidebarMenuButton asChild size="sm" className="bg-zinc-800 p-4 cursor-pointer">
 										<div>
 											<Plus />
-											<span>Criar tarefa</span>
+											<span>Criar tarefa simples</span>
 										</div>
 									</SidebarMenuButton>
 								</CreateTaskModal>
 							</SidebarMenuItem>
 
-							<SidebarMenuItem>
+							{/* <SidebarMenuItem>
 								<CreateTaskModal>
 									<SidebarMenuButton asChild size="sm">
 										<div>
@@ -114,7 +110,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 										</div>
 									</SidebarMenuButton>
 								</CreateTaskModal>
-							</SidebarMenuItem>
+							</SidebarMenuItem> */}
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>
