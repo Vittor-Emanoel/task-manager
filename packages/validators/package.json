@@ -1,0 +1,24 @@
+{
+  "name": "@task-ai/validators",
+  "version": "1.0.0",
+  "description": "pacote para guardar os meus schemas do zod compartilháveis",
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./dist/inde.js",
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup"
+  },
+  "dependencies": {
+    "tsc": "^2.0.4",
+    "tsup": "^8.5.0",
+    "zod": "^4.0.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

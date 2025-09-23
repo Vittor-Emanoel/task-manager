@@ -15,6 +15,13 @@
       "when": 1758383386350,
       "tag": "0001_awesome_true_believers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1758628381856,
+      "tag": "0002_cynical_raza",
+      "breakpoints": true
     }
   ]
 }
