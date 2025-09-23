@@ -6,6 +6,7 @@ import {
 	text,
 	time,
 	timestamp,
+	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
@@ -32,7 +33,7 @@ export const recurringPatternEnum = pgEnum("recurring_pattern", [
 ]);
 
 export const category = pgTable("category", {
-	id: text("id").primaryKey(),
+	id: uuid().notNull().primaryKey().defaultRandom(),
 	name: varchar({ length: 255 }).notNull().unique(),
 	color: varchar({ length: 128 }),
 });
@@ -63,7 +64,7 @@ export const task = pgTable("task", {
 	finishedAt: timestamp("finished_at"),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	userId: text("user_id").references(() => user.id),
-	categoryId: text("category_id").references(() => category.id),
+	categoryId: uuid("category_id").references(() => category.id),
 });
 
 export const notification = pgTable("notification", {

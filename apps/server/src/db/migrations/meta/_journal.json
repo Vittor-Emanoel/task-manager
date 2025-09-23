@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1758321661834,
-      "tag": "0000_huge_pet_avengers",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1758383386350,
-      "tag": "0001_awesome_true_believers",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1758628381856,
-      "tag": "0002_cynical_raza",
+      "when": 1758660718580,
+      "tag": "0000_lyrical_mandarin",
       "breakpoints": true
     }
   ]

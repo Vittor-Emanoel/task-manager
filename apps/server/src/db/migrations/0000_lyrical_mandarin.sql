@@ -1,5 +1,7 @@
+CREATE TYPE "public"."recurring_pattern" AS ENUM('daily', 'weekly', 'monthly', 'yearly');--> statement-breakpoint
 CREATE TYPE "public"."priorityLevel" AS ENUM('high', 'medium', 'low');--> statement-breakpoint
 CREATE TYPE "public"."status" AS ENUM('completed', 'pending', 'deleted');--> statement-breakpoint
+CREATE TYPE "public"."task_type" AS ENUM('single', 'recurring');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -49,7 +51,7 @@ CREATE TABLE "verification" (
 );
 --> statement-breakpoint
 CREATE TABLE "category" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"color" varchar(128),
 	CONSTRAINT "category_name_unique" UNIQUE("name")
@@ -70,12 +72,21 @@ CREATE TABLE "task" (
 	"description" varchar(255),
 	"status" "status" NOT NULL,
 	"priorityLevel" "priorityLevel" NOT NULL,
+	"taskType" "task_type" NOT NULL,
+	"scheduled_date" timestamp,
+	"scheduled_time" time,
+	"recurringPattern" "recurring_pattern",
+	"recurring_interval" integer,
+	"recurring_days_of_week" text,
+	"recurring_day_of_month" integer,
+	"recurring_end_date" timestamp,
+	"recurring_end_time" timestamp,
 	"recurrent_quantity" integer,
 	"recurrent_type" integer,
 	"finished_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"user_id" text,
-	"category_id" text
+	"category_id" uuid
 );
 --> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

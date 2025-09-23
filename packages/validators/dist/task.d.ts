@@ -37,7 +37,8 @@ declare const createTaskSchema: z.ZodObject<{
         single: "single";
         recurring: "recurring";
     }>>;
-    scheduledAt: z.ZodOptional<z.ZodDate>;
+    scheduledDate: z.ZodOptional<z.ZodDate>;
+    scheduledTime: z.ZodOptional<z.ZodNumber>;
     recurringPattern: z.ZodOptional<z.ZodEnum<{
         daily: "daily";
         weekly: "weekly";
@@ -48,11 +49,12 @@ declare const createTaskSchema: z.ZodObject<{
     recurringDaysOfWeek: z.ZodOptional<z.ZodArray<z.ZodNumber>>;
     recurringDayOfMonth: z.ZodOptional<z.ZodNumber>;
     recurringEndDate: z.ZodOptional<z.ZodDate>;
+    recurringEndTime: z.ZodOptional<z.ZodDate>;
     recurringCount: z.ZodOptional<z.ZodNumber>;
     finishedAt: z.ZodOptional<z.ZodDate>;
     createdAt: z.ZodDefault<z.ZodOptional<z.ZodDate>>;
-    userId: z.ZodString;
-    categoryId: z.ZodOptional<z.ZodString>;
+    userId: z.ZodUUID;
+    categoryId: z.ZodUUID;
 }, z.core.$strip>;
 type CreateTaskInput = z.infer<typeof createTaskSchema>;
 

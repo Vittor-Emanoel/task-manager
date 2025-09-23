@@ -15,17 +15,23 @@ var createTaskSchema = z.object({
   status: TaskStatusSchema.default("pending"),
   priorityLevel: TaskPriorityLevelSchema.default("low"),
   taskType: TaskTypeSchema.default("single"),
-  scheduledAt: z.date().optional(),
+  // agendamento
+  scheduledDate: z.date().optional(),
+  scheduledTime: z.number().int().min(0).max(2359).optional(),
+  // formato inteiro tipo 930 para 09:30
+  // recorrência
   recurringPattern: RecurringPatternSchema.optional(),
   recurringInterval: z.number().int().min(1).optional(),
   recurringDaysOfWeek: z.array(z.number().int().min(0).max(6)).optional(),
   recurringDayOfMonth: z.number().int().min(1).max(31).optional(),
   recurringEndDate: z.date().optional(),
+  recurringEndTime: z.date().optional(),
   recurringCount: z.number().int().min(1).optional(),
   finishedAt: z.date().optional(),
   createdAt: z.date().optional().default(() => /* @__PURE__ */ new Date()),
-  userId: z.string().uuid(),
-  categoryId: z.string().uuid().optional()
+  // relacionamentos
+  userId: z.uuid(),
+  categoryId: z.uuid()
 });
 
 export {

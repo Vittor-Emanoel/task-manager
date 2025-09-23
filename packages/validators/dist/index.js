@@ -1,14 +1,18 @@
 import {
+  categorySchema
+} from "./chunk-FMQL45QM.js";
+import {
   RecurringPatternSchema,
   TaskPriorityLevelSchema,
   TaskStatusSchema,
   TaskTypeSchema,
   createTaskSchema
-} from "./chunk-ROOS55FD.js";
+} from "./chunk-6QJRMXGL.js";
 export {
   RecurringPatternSchema,
   TaskPriorityLevelSchema,
   TaskStatusSchema,
   TaskTypeSchema,
+  categorySchema,
   createTaskSchema
 };

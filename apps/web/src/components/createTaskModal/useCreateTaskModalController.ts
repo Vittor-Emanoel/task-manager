@@ -1,10 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 
-
 export const useCreateTaskModalController = () => {
-
-
-
 	const form = useForm({
 		defaultValues: {
 			name: "",
@@ -16,8 +12,5 @@ export const useCreateTaskModalController = () => {
 		},
 	});
 
-	return {
-	form,
-
-	};
+	return { form };
 };

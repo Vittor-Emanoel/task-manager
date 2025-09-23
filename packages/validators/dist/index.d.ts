@@ -1,2 +1,3 @@
-export { CreateTaskInput, createTaskSchema, RecurringPatternSchema, TaskPriorityLevelSchema, TaskStatusSchema, TaskTypeSchema } from './task.js';
+export { CreateCategoryInput, categorySchema } from './category.js';
+export { CreateTaskInput, RecurringPatternSchema, TaskPriorityLevelSchema, TaskStatusSchema, TaskTypeSchema, createTaskSchema } from './task.js';
 import 'zod';
