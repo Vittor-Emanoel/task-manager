@@ -51,7 +51,7 @@ CREATE TABLE "verification" (
 );
 --> statement-breakpoint
 CREATE TABLE "category" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"color" varchar(128),
 	CONSTRAINT "category_name_unique" UNIQUE("name")
@@ -72,21 +72,10 @@ CREATE TABLE "task" (
 	"description" varchar(255),
 	"status" "status" NOT NULL,
 	"priorityLevel" "priorityLevel" NOT NULL,
-	"taskType" "task_type" NOT NULL,
-	"scheduled_date" timestamp,
-	"scheduled_time" time,
-	"recurringPattern" "recurring_pattern",
-	"recurring_interval" integer,
-	"recurring_days_of_week" text,
-	"recurring_day_of_month" integer,
-	"recurring_end_date" timestamp,
-	"recurring_end_time" timestamp,
-	"recurrent_quantity" integer,
-	"recurrent_type" integer,
 	"finished_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"user_id" text,
-	"category_id" uuid
+	"category_id" text
 );
 --> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

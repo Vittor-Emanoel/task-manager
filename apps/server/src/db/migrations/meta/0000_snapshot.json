@@ -1,5 +1,5 @@
 {
-  "id": "56cc8fd5-5770-48b4-8e0e-36577ee3a80a",
+  "id": "78df0980-a1f0-40cf-8577-f72b4a8a14d5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -310,10 +310,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "name": {
           "name": "name",
@@ -457,74 +456,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "taskType": {
-          "name": "taskType",
-          "type": "task_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "scheduled_date": {
-          "name": "scheduled_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "scheduled_time": {
-          "name": "scheduled_time",
-          "type": "time",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recurringPattern": {
-          "name": "recurringPattern",
-          "type": "recurring_pattern",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recurring_interval": {
-          "name": "recurring_interval",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recurring_days_of_week": {
-          "name": "recurring_days_of_week",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recurring_day_of_month": {
-          "name": "recurring_day_of_month",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recurring_end_date": {
-          "name": "recurring_end_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recurring_end_time": {
-          "name": "recurring_end_time",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recurrent_quantity": {
-          "name": "recurrent_quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "recurrent_type": {
-          "name": "recurrent_type",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
         "finished_at": {
           "name": "finished_at",
           "type": "timestamp",
@@ -546,7 +477,7 @@
         },
         "category_id": {
           "name": "category_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }

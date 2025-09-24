@@ -5,7 +5,7 @@ services:
     image: postgres
     container_name: task-manager-ai-postgres
     environment:
-      POSTGRES_DB: task-manager-ai
+      POSTGRES_DB: db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:

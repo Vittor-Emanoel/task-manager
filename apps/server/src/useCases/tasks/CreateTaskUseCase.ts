@@ -1,3 +1,5 @@
+import type { Task } from "@/entities/Task";
+
 export class CreateTaskUseCase {
-	async execute() {}
+	async execute(data: Task) { }
 }
