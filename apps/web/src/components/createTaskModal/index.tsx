@@ -29,11 +29,12 @@ interface ICreateTaskModalProps {
 	children: React.ReactNode;
 }
 
-export const CreateTaskModal = ({ children }: ICreateTaskModalProps) => {
+export const CreateTaskModal = async ({ children }: ICreateTaskModalProps) => {
 	const [categoryId, setCategoryId] = useState("1");
 	const {
 		form
 	} = useCreateTaskModalController();
+
 
 	return (
 		<Dialog>

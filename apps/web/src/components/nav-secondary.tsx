@@ -1,5 +1,5 @@
-import * as React from "react"
-import { type LucideIcon } from "lucide-react"
+import { type LucideIcon } from "lucide-react";
+import * as React from "react";
 
 import {
   SidebarGroup,
@@ -7,18 +7,23 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+
+interface NavSecondaryItem {
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  badge?: string | number;
+}
+
+interface NavSecondaryProps {
+  items: NavSecondaryItem[];
+}
 
 export function NavSecondary({
   items,
   ...props
-}: {
-  items: {
-    title: string
-    url: string
-    icon: LucideIcon
-  }[]
-} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+}: NavSecondaryProps & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
@@ -29,6 +34,11 @@ export function NavSecondary({
                 <a href={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
+                  {item.badge && (
+                    <span className="ml-auto text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>

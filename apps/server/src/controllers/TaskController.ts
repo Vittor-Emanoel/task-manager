@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { task } from "@/db/schema";
+import { authMiddleware } from "@/middlewares/AuthMiddleware";
 import { and, eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
@@ -20,11 +21,11 @@ export const updateTaskSchema = createTaskSchema.extend({
 });
 
 export async function taskRoutes(fastify: FastifyInstance) {
-  fastify.get("/tasks", async (request, reply) => {
+  fastify.get("/tasks", {
+    preHandler: [authMiddleware]
+  }, async (request, reply) => {
     try {
-      const tasks = await db
-        .select()
-        .from(task)
+      const tasks = await db.select().from(task)
         .where(eq(task.userId, request.user.id));
       reply.send(tasks);
     } catch (err) {

@@ -1,3 +1,4 @@
+import { getAll } from "@/services/task/getAll";
 import { useForm } from "@tanstack/react-form";
 
 export const useCreateTaskModalController = () => {
@@ -7,9 +8,14 @@ export const useCreateTaskModalController = () => {
 			description: "",
 			categoryId: "",
 		},
-		onSubmit: ({ value }) => {
-			console.log(value, "value");
-		},
+		onSubmit: async ({ value }) => {
+			
+		const a = await getAll()
+
+		console.log(a, 'A')
+		// 		await CreateTaskAction(value)
+				// alert('OK')
+			},
 	});
 
 	return { form };

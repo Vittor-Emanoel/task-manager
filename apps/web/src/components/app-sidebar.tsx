@@ -1,8 +1,20 @@
 "use client";
 
 import {
+	AlertTriangle,
 	Bell,
-	Plus
+	Briefcase,
+	Calendar,
+	CheckSquare,
+	FolderPlus,
+	HelpCircle,
+	LayoutDashboard,
+	LifeBuoy,
+	Lightbulb,
+	MessageSquare,
+	Plus,
+	Settings2,
+	User
 } from "lucide-react";
 import type * as React from "react";
 
@@ -11,23 +23,157 @@ import {
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
-	SidebarGroup,
-	SidebarGroupContent,
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
-	SidebarMenuItem,
+	SidebarMenuItem
 } from "@/components/ui/sidebar";
-import { CreateTaskModal } from "./createTaskModal";
 import { Logo } from "./logo";
+import { NavMain } from "./nav-main";
+import { NavCategories } from "./nav-projects";
+import { NavSecondary } from "./nav-secondary";
 
 const data = {
 	user: {
-		name: "vittor",
+		name: "Vittor",
 		email: "vittor@example.com",
-		avatar: "http://github.com/Vittor-Emanoel.png",
+		avatar: "https://avatars.githubusercontent.com/u/55211291?v=4",
 	},
+	navMain: [
+		{
+			title: "Dashboard",
+			url: "#",
+			icon: LayoutDashboard,
+			isActive: true,
+			items: [
+				{
+					title: "Visão Geral",
+					url: "#",
+				},
+				{
+					title: "Atividade Recente",
+					url: "#",
+				},
+			
+			],
+		},
+		{
+			title: "Tarefas",
+			url: "#",
+			icon: CheckSquare,
+			items: [
+				{
+					title: "Todas as Tarefas",
+					url: "#",
+				},
+				{
+					title: "Pendentes",
+					url: "#",
+				},
+				{
+					title: "Em Andamento",
+					url: "#",
+				},
+				{
+					title: "Concluídas",
+					url: "#",
+				},
+				{
+					title: "Atrasadas",
+					url: "#",
+				},
+			],
+		},
+	
+		{
+			title: "Calendário",
+			url: "#",
+			icon: Calendar,
+			items: [
+				{
+					title: "Hoje",
+					url: "#",
+				},
+				{
+					title: "Esta Semana",
+					url: "#",
+				},
+				{
+					title: "Este Mês",
+					url: "#",
+				},
+				{
+					title: "Próximos Prazos",
+					url: "#",
+				},
+			],
+		},
+		
+	],
+	navSecondary: [
+		{
+			title: "Ajuda",
+			url: "#",
+			icon: HelpCircle,
+		},
+		{
+			title: "Feedback",
+			url: "#",
+			icon: MessageSquare,
+		},
+		{
+			title: "Suporte",
+			url: "#",
+			icon: LifeBuoy,
+		},
+			{
+			title: "Integrações",
+			url: "#",
+			icon: Settings2,
+		},
+	],
+	categories: [
+		{
+			name: "Trabalho",
+			url: "#",
+			icon: Briefcase,
+			color: "#3b82f6",
+		},
+		{
+			name: "Personal",
+			url: "#",
+			icon: User,
+			color: "#10b981",
+		},
+		{
+			name: "Urgente",
+			url: "#",
+			icon: AlertTriangle,
+			color: "#ef4444",
+		},
+		{
+			name: "Ideias",
+			url: "#",
+			icon: Lightbulb,
+			color: "#f59e0b",
+		},
+	],
+	quickActions: [
+		{
+			title: "Nova Tarefa",
+			action: "create-task",
+			icon: Plus,
+			shortcut: "Ctrl+N",
+		},
+		{
+			title: "Novo Projeto",
+			action: "create-project",
+			icon: FolderPlus,
+			shortcut: "Ctrl+Shift+N",
+		},
+	],
 };
+
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
@@ -54,66 +200,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
-				<SidebarGroup>
-					<SidebarGroupContent>
-						<SidebarMenu>
-							<SidebarMenuItem>
-								<CreateTaskModal>
-									<SidebarMenuButton asChild size="sm" className="bg-zinc-800 p-4 cursor-pointer">
-										<div>
-											<Plus />
-											<span>Criar tarefa simples</span>
-										</div>
-									</SidebarMenuButton>
-								</CreateTaskModal>
-							</SidebarMenuItem>
-
-							{/* <SidebarMenuItem>
-								<CreateTaskModal>
-									<SidebarMenuButton asChild size="sm">
-										<div>
-											<Search />
-											<span>Buscar</span>
-										</div>
-									</SidebarMenuButton>
-								</CreateTaskModal>
-							</SidebarMenuItem>
-
-							<SidebarMenuItem>
-								<CreateTaskModal>
-									<SidebarMenuButton asChild size="sm">
-										<div>
-											<Inbox />
-											<span>Entrada</span>
-										</div>
-									</SidebarMenuButton>
-								</CreateTaskModal>
-							</SidebarMenuItem>
-
-							<SidebarMenuItem>
-								<CreateTaskModal>
-									<SidebarMenuButton asChild size="sm">
-										<div>
-											<Calendar />
-											<span>Hoje</span>
-										</div>
-									</SidebarMenuButton>
-								</CreateTaskModal>
-							</SidebarMenuItem>
-
-							<SidebarMenuItem>
-								<CreateTaskModal>
-									<SidebarMenuButton asChild size="sm">
-										<div>
-											<Sparkles />
-											<span>Futuras</span>
-										</div>
-									</SidebarMenuButton>
-								</CreateTaskModal>
-							</SidebarMenuItem> */}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
+				<NavMain items={data.navMain} />
+        <NavCategories categories={data.categories} />
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={data.user} />

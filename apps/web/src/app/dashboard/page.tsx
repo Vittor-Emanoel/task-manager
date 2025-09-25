@@ -8,7 +8,6 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -66,10 +65,10 @@ export default function Page() {
 
             <div className="flex items-center gap-3">
               <CreateTaskModal>
-                <Button>
+                <div>
                   Nova tarefa
                   <Plus />
-                </Button>
+                </div>
               </CreateTaskModal>
             </div>
           </div>

@@ -7,10 +7,12 @@ export async function authMiddleware(
   reply: FastifyReply
 ) {
   try {
-    console.log(request.headers);
+    
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(request.raw.headers),
     });
+
+    console.log(session);
 
     if (!session) {
       reply.code(401).send({ error: "Unauthorized" });
