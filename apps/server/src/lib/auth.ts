@@ -9,7 +9,12 @@ export const auth = betterAuth<BetterAuthOptions>({
   trustedOrigins: ["http://localhost:3001"],
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema: schema,
+    schema: {
+      user: schema.user,
+      session: schema.session,
+      account: schema.account,
+      verification: schema.verification,
+    },
   }),
 
   emailAndPassword: {
@@ -23,6 +28,9 @@ export const auth = betterAuth<BetterAuthOptions>({
   },
   plugins: [nextCookies()],
   advanced: {
+    database: {
+      generateId: false,
+    },
     cookies: {
       session_token: {
         name: "task-ai",

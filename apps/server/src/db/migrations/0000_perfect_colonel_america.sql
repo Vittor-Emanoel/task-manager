@@ -1,12 +1,10 @@
-CREATE TYPE "public"."recurring_pattern" AS ENUM('daily', 'weekly', 'monthly', 'yearly');--> statement-breakpoint
 CREATE TYPE "public"."priorityLevel" AS ENUM('high', 'medium', 'low');--> statement-breakpoint
 CREATE TYPE "public"."status" AS ENUM('completed', 'pending', 'deleted');--> statement-breakpoint
-CREATE TYPE "public"."task_type" AS ENUM('single', 'recurring');--> statement-breakpoint
 CREATE TABLE "account" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"account_id" text NOT NULL,
 	"provider_id" text NOT NULL,
-	"user_id" text NOT NULL,
+	"user_id" uuid NOT NULL,
 	"access_token" text,
 	"refresh_token" text,
 	"id_token" text,
@@ -19,19 +17,19 @@ CREATE TABLE "account" (
 );
 --> statement-breakpoint
 CREATE TABLE "session" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"expires_at" timestamp NOT NULL,
 	"token" text NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL,
 	"ip_address" text,
 	"user_agent" text,
-	"user_id" text NOT NULL,
+	"user_id" uuid NOT NULL,
 	CONSTRAINT "session_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
 CREATE TABLE "user" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
 	"email" text NOT NULL,
 	"email_verified" boolean NOT NULL,
@@ -42,7 +40,7 @@ CREATE TABLE "user" (
 );
 --> statement-breakpoint
 CREATE TABLE "verification" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"identifier" text NOT NULL,
 	"value" text NOT NULL,
 	"expires_at" timestamp NOT NULL,
@@ -51,31 +49,31 @@ CREATE TABLE "verification" (
 );
 --> statement-breakpoint
 CREATE TABLE "category" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"color" varchar(128),
 	CONSTRAINT "category_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "notification" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"message" varchar(255),
-	"was_read" boolean,
+	"was_read" boolean DEFAULT false,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"user_id" text,
-	"task_id" text
+	"user_id" uuid,
+	"task_id" uuid
 );
 --> statement-breakpoint
 CREATE TABLE "task" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"description" varchar(255),
-	"status" "status" NOT NULL,
-	"priorityLevel" "priorityLevel" NOT NULL,
+	"status" "status" DEFAULT 'pending' NOT NULL,
+	"priorityLevel" "priorityLevel" DEFAULT 'low' NOT NULL,
 	"finished_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"user_id" text,
-	"category_id" text
+	"user_id" uuid,
+	"category_id" uuid
 );
 --> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
