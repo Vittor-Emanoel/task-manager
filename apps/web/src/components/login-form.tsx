@@ -1,23 +1,26 @@
 "use client";
 
-import { GalleryVerticalEnd, Link } from "lucide-react";
+import { GalleryVerticalEnd } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+import { signIn } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  // const loginWithGoogle = async () => {
-  //   await authClient.signIn.social({
-  //     provider: "google",
-  //     callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/dashboard`,
-  //     errorCallbackURL: "/error",
-  //   });
-  // };
+  const loginWithGoogle = async () => {
+    await signIn.social({
+      provider: "google",
+      callbackURL: 'http://localhost:5173/',
+      errorCallbackURL: "/error",
+    });
+  };
 
   // const form = useForm({
   //   defaultValues: {
@@ -73,9 +76,9 @@ export function LoginForm({
             <h1 className="text-xl font-bold">
               Bem vindo ao <span className="text-sky-500">Task.IA</span>
             </h1>
-            <div className="text-center text-sm">
+            <div className="text-center text-sm flex items-center gap-1" >
               Não tem um acesso?{" "}
-              <Link to="/sign-up" className="underline underline-offset-4">
+              <Link to="/register" className="underline underline-offset-4">
                 Criar conta
               </Link>
             </div>
@@ -133,7 +136,7 @@ export function LoginForm({
             variant="outline"
             type="button"
             className="w-full"
-            // onClick={() => loginWithGoogle()}
+            onClick={() => loginWithGoogle()}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path

@@ -1,6 +1,6 @@
 import { createAuthClient } from "better-auth/react";
 
-export const authClient = createAuthClient({
+export const { useSession, signIn, signOut } = createAuthClient({
   baseURL: "http://localhost:3000",
   cookiePrefix: "task-ai",
 });

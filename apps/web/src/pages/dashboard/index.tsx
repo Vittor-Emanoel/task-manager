@@ -29,10 +29,25 @@ import {
 } from "@/components/ui/sidebar";
 import { useTasks } from "@/hooks/useTasks";
 
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
+import { useQueryState } from "nuqs";
+import { useDeferredValue, useMemo } from "react";
 
+///TODO: criar loading state container/empty search, ajustar toggle/ prorioridade etc.
+///TODO: quebrar esse componente
 export const Dashboard = () => {
-  const { tasks, isLoading } = useTasks();
+  const [searchTerm, setSearchTerm] = useQueryState("task_title", { defaultValue: "" });
+  const deferredQuery = useDeferredValue(searchTerm)
+  const { tasks, isLoading: isTasksLoading } = useTasks();
+
+  const tasksFiltered = useMemo(() => {
+    return searchTerm.length === 0 ? tasks : tasks.filter((task) =>
+      task.title.toLowerCase().startsWith(deferredQuery)
+    )
+  }, [searchTerm, tasks])
+
+
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -65,12 +80,7 @@ export const Dashboard = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <CreateTaskModal>
-                <div>
-                  Nova tarefa
-                  <Plus />
-                </div>
-              </CreateTaskModal>
+              <CreateTaskModal />
             </div>
           </div>
 
@@ -80,8 +90,9 @@ export const Dashboard = () => {
                 <Input
                   id={"a"}
                   className="peer ps-9"
-                  placeholder="Ler pelo menos 30 minutos hoje..."
+                  placeholder="Busque por titulo..."
                   type="email"
+                  onChange={({ target }) => setSearchTerm(target.value)}
                 />
                 <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
                   <Search size={16} aria-hidden="true" />
@@ -116,16 +127,16 @@ export const Dashboard = () => {
 
           <div className="flex flex-col gap-4 overflow-y-auto">
             <div className="flex flex-col gap-4 overflow-y-auto">
-              {isLoading ? (
+              {isTasksLoading ? (
                 <p>carregando</p>
               ) : (
-                tasks?.map((task) => (
+                tasksFiltered?.map((task) => (
                   <Card key={task.id}>
                     <CardHeader>
                       <div className="flex items-center gap-3">
                         <Checkbox
                           checked={task.status === "done"}
-                          onCheckedChange={(checked) => {}}
+                        // onCheckedChange={(checked) => { }}
                         />
                         <div className="flex flex-col">
                           <CardTitle

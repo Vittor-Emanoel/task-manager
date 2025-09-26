@@ -1,11 +1,13 @@
+import type { Task } from "@/entities/Task";
 import { useCategories } from "@/hooks/useCategories";
 import { taskService } from "@/services/taskService";
 import type { CreateTaskParams } from "@/services/taskService/create";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { CheckCheckIcon } from "lucide-react";
-import { useCallback } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CheckCheckIcon, PlusCircle } from "lucide-react";
+import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import {
@@ -27,9 +29,6 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 
-interface ICreateTaskModalProps {
-  children: React.ReactNode;
-}
 
 const createTaskSchema = z.object({
   title: z.string().min(1),
@@ -39,14 +38,37 @@ const createTaskSchema = z.object({
 
 type FormData = z.infer<typeof createTaskSchema>;
 
-export const CreateTaskModal = ({ children }: ICreateTaskModalProps) => {
+export const CreateTaskModal = () => {
+  const [openModal, setOpenModal] = useState(false)
   const { categories } = useCategories();
+  const queryClient = useQueryClient()
+
   const { mutateAsync } = useMutation({
     mutationFn: async (data: CreateTaskParams) => {
       return taskService.create(data);
     },
+    onMutate: async (newTask) => {
+      await queryClient.cancelQueries({ queryKey: ['tasks'] });
+
+      const previousTasks = queryClient.getQueryData<CreateTaskParams[]>(['tasks']);
+
+      queryClient.setQueryData<Task[]>(['tasks'], (old = []) => [...old, { ...newTask, id: 'temp-id' }]);
+
+      return { previousTasks };
+    },
+    onError: (_err, _newTask, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['tasks'], context.previousTasks);
+      }
+      toast.error('Erro ao criar tarefa!');
+    },
+    onSuccess: () => {
+      toast.success('Tarefa criada com sucesso!');
+      setOpenModal(false);
+    }
   });
-  const { handleSubmit, register, control, formState } = useForm({
+
+  const { handleSubmit, register, control, formState, reset } = useForm({
     defaultValues: {
       title: "",
       description: "",
@@ -57,13 +79,24 @@ export const CreateTaskModal = ({ children }: ICreateTaskModalProps) => {
   const handleCreateTask = useCallback(async (formData: FormData) => {
     try {
       await mutateAsync(formData);
-      alert("Criada");
-    } catch (error) {}
+      toast.success('Tarefa criada com sucesso!')
+      reset()
+      setOpenModal(false)
+    } catch (error) {
+      toast.error('Erro ao criar tarefa!')
+    }
   }, []);
 
   return (
-    <Dialog>
-      <DialogTrigger className="w-full">{children}</DialogTrigger>
+    <Dialog open={openModal} onOpenChange={(state) => setOpenModal(state)}>
+      <DialogTrigger className="w-full" asChild>
+        <Button onClick={() => setOpenModal(true)}>
+          <div className="flex items-center gap-2">
+            Nova tarefa
+            <PlusCircle />
+          </div>
+        </Button>
+      </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Criar tarefa</DialogTitle>
@@ -114,7 +147,7 @@ export const CreateTaskModal = ({ children }: ICreateTaskModalProps) => {
             </div>
 
             <div className="flex items-center gap-4 justify-between">
-              <Button type="button" className="flex-1" variant="outline">
+              <Button type="button" className="flex-1" variant="outline" onClick={() => setOpenModal(false)}>
                 Cancelar
               </Button>
               <Button
