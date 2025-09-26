@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import { CreateTaskModal } from "@/components/createTaskModal";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,11 +8,11 @@ import {
 } from "@/components/ui/breadcrumb";
 import {
   Card,
-  CardAction,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -26,10 +27,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useTasks } from "@/hooks/useTasks";
 
 import { Plus, Search } from "lucide-react";
 
 export const Dashboard = () => {
+  const { tasks, isLoading } = useTasks();
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -62,12 +65,12 @@ export const Dashboard = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* <CreateTaskModal> */}
-              <div>
-                Nova tarefa
-                <Plus />
-              </div>
-              {/* </CreateTaskModal> */}
+              <CreateTaskModal>
+                <div>
+                  Nova tarefa
+                  <Plus />
+                </div>
+              </CreateTaskModal>
             </div>
           </div>
 
@@ -112,46 +115,37 @@ export const Dashboard = () => {
           </div>
 
           <div className="flex flex-col gap-4 overflow-y-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ligar para mecanico</CardTitle>
-                <CardDescription>
-                  Preciso ligar para o mecanico, pois preciso buscar o carro as
-                  12:00
-                </CardDescription>
-                <CardAction>Card Action</CardAction>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Ligar para mecanico</CardTitle>
-                <CardDescription>
-                  Preciso ligar para o mecanico, pois preciso buscar o carro as
-                  12:00
-                </CardDescription>
-                <CardAction>Card Action</CardAction>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Ligar para mecanico</CardTitle>
-                <CardDescription>
-                  Preciso ligar para o mecanico, pois preciso buscar o carro as
-                  12:00
-                </CardDescription>
-                <CardAction>Card Action</CardAction>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Ligar para mecanico</CardTitle>
-                <CardDescription>
-                  Preciso ligar para o mecanico, pois preciso buscar o carro as
-                  12:00
-                </CardDescription>
-                <CardAction>Card Action</CardAction>
-              </CardHeader>
-            </Card>
+            <div className="flex flex-col gap-4 overflow-y-auto">
+              {isLoading ? (
+                <p>carregando</p>
+              ) : (
+                tasks?.map((task) => (
+                  <Card key={task.id}>
+                    <CardHeader>
+                      <div className="flex items-center gap-3">
+                        <Checkbox
+                          checked={task.status === "done"}
+                          onCheckedChange={(checked) => {}}
+                        />
+                        <div className="flex flex-col">
+                          <CardTitle
+                            className={
+                              task.status === "done"
+                                ? "line-through text-gray-400"
+                                : ""
+                            }
+                          >
+                            {task.title}
+                          </CardTitle>
+                          <CardDescription>{task.description}</CardDescription>
+                        </div>
+                      </div>
+                      {/* <CardAction>Ação</CardAction> */}
+                    </CardHeader>
+                  </Card>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </SidebarInset>

@@ -1,3 +1,4 @@
+import { LaunchScreen } from "@/components/splash";
 import { createAuthClient } from "better-auth/react";
 import { Navigate, Outlet } from "react-router-dom";
 const { useSession } = createAuthClient();
@@ -7,10 +8,13 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ isPrivate }: AuthGuardProps) {
-  const { data } = useSession();
+  const { data, isPending = true } = useSession();
 
   const signedIn = !!data;
 
+  if (isPending) {
+    return <LaunchScreen isLoading={isPending} />;
+  }
   if (!signedIn && isPrivate) {
     return <Navigate to="/login" replace />;
   }

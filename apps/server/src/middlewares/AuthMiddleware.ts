@@ -7,7 +7,6 @@ export async function authMiddleware(
   reply: FastifyReply
 ) {
   try {
-    
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(request.raw.headers),
     });

@@ -1,139 +1,134 @@
-import { Field } from "@tanstack/react-form";
+import { useCategories } from "@/hooks/useCategories";
+import { taskService } from "@/services/taskService";
+import type { CreateTaskParams } from "@/services/taskService/create";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { CheckCheckIcon } from "lucide-react";
-
-import { useState } from "react";
+import { useCallback } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "../ui/button";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
-import {
-	useCreateTaskModalController
-} from "./useCreateTaskModalController";
 
 interface ICreateTaskModalProps {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }
 
-export const CreateTaskModal = async ({ children }: ICreateTaskModalProps) => {
-	const [categoryId, setCategoryId] = useState("1");
-	const {
-		form
-	} = useCreateTaskModalController();
+const createTaskSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().optional(),
+  categoryId: z.uuid(),
+});
 
+type FormData = z.infer<typeof createTaskSchema>;
 
-	return (
-		<Dialog>
-			<DialogTrigger className="w-full">{children}</DialogTrigger>
-			<DialogContent className="max-w-md">
-				<DialogHeader>
-					<DialogTitle>Criar tarefa</DialogTitle>
-					<DialogDescription>
-						Crie sua tarefa simples
-					</DialogDescription>
-				</DialogHeader>
+export const CreateTaskModal = ({ children }: ICreateTaskModalProps) => {
+  const { categories } = useCategories();
+  const { mutateAsync } = useMutation({
+    mutationFn: async (data: CreateTaskParams) => {
+      return taskService.create(data);
+    },
+  });
+  const { handleSubmit, register, control, formState } = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+    resolver: zodResolver(createTaskSchema),
+  });
 
-				<form
-					onSubmit={(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-						form.handleSubmit();
-					}}
-				>
-					<div className="space-y-4">
-						<form.Field
-							name="name"
-							children={(field) => (
-								<Input
-									placeholder="Nome da tarefa"
-									maxLength={255}
-									id={field.name}
-									name={field.name}
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-							)}
-						/>
+  const handleCreateTask = useCallback(async (formData: FormData) => {
+    try {
+      await mutateAsync(formData);
+      alert("Criada");
+    } catch (error) {}
+  }, []);
 
-						<form.Field
-							name="description"
-							children={(field) => {
-								return (
-									<Textarea
-										id={field.name}
-										name={field.name}
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										placeholder="Descrição (opcional)"
-										maxLength={255}
-										rows={3}
-									/>
-								);
-							}}
-						/>
-						<div className="space-y-2">
-							<Field name="categoryId" form={form}>
-								{(field) => (
-									<>
-										<Label htmlFor={field.name}>Categoria</Label>
-										<Select
-											value={categoryId}
-											onValueChange={(value) => {
-												field.handleChange(value);
-												setCategoryId(value);
-											}}
-										>
-											<SelectTrigger className="w-full">
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="1">Trabalho</SelectItem>
-												<SelectItem value="2">Pessoal</SelectItem>
-												<SelectItem value="3">home</SelectItem>
-											</SelectContent>
-										</Select>
-									</>
-								)}
-							</Field>
-						</div>
+  return (
+    <Dialog>
+      <DialogTrigger className="w-full">{children}</DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Criar tarefa</DialogTitle>
+          <DialogDescription>Crie sua tarefa simples</DialogDescription>
+        </DialogHeader>
 
+        <form onSubmit={handleSubmit(handleCreateTask)}>
+          <div className="space-y-4">
+            <Input
+              placeholder="Nome da tarefa"
+              maxLength={255}
+              {...register("title")}
+            />
 
+            <Textarea
+              placeholder="Descrição (opcional)"
+              maxLength={255}
+              rows={3}
+              {...register("description")}
+            />
+            <div className="space-y-2">
+              <Controller
+                name="categoryId"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <Label>Categoria</Label>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </>
+                )}
+              />
+            </div>
 
-
-						<div className="flex items-center gap-4 justify-between">
-							<Button type="button" className="flex-1" variant="outline">
-								Cancelar
-							</Button>
-							<form.Subscribe>
-								{(state) => (
-									<Button type="submit" className="flex-1"
-										disabled={!state.canSubmit || state.isSubmitting}
-									>
-										{state.isSubmitting ? "Criando tarefa..." : "Criar tarefa"}
-										<CheckCheckIcon />
-									</Button>
-								)}
-							</form.Subscribe>
-						</div>
-					</div>
-				</form>
-			</DialogContent>
-		</Dialog>
-	);
+            <div className="flex items-center gap-4 justify-between">
+              <Button type="button" className="flex-1" variant="outline">
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={formState.isSubmitting || !formState.isReady}
+              >
+                {formState.isSubmitting ? "Criando tarefa..." : "Criar tarefa"}
+                <CheckCheckIcon />
+              </Button>
+            </div>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
 };

@@ -21,17 +21,23 @@ export const updateTaskSchema = createTaskSchema.extend({
 });
 
 export async function taskRoutes(fastify: FastifyInstance) {
-  fastify.get("/tasks", {
-    preHandler: [authMiddleware]
-  }, async (request, reply) => {
-    try {
-      const tasks = await db.select().from(task)
-        .where(eq(task.userId, request.user.id));
-      reply.send(tasks);
-    } catch (err) {
-      reply.code(500).send({ error: "Failed to fetch tasks", details: err });
+  fastify.get(
+    "/tasks",
+    {
+      preHandler: [authMiddleware],
+    },
+    async (request, reply) => {
+      try {
+        const tasks = await db
+          .select()
+          .from(task)
+          .where(eq(task.userId, request.user.id));
+        reply.send(tasks);
+      } catch (err) {
+        reply.code(500).send({ error: "Failed to fetch tasks", details: err });
+      }
     }
-  });
+  );
 
   fastify.get("/tasks/:id", async (request, reply) => {
     try {
@@ -48,21 +54,31 @@ export async function taskRoutes(fastify: FastifyInstance) {
     }
   });
 
-  fastify.post("/tasks", async (request, reply) => {
-    try {
-      const parsed = createTaskSchema.parse(request.body);
-      const newTask = await db
-        .insert(task)
-        .values({ ...parsed, userId: request.user.id })
-        .returning();
+  fastify.post(
+    "/tasks",
+    {
+      preHandler: [authMiddleware],
+    },
+    async (request, reply) => {
+      try {
+        const parsed = createTaskSchema.parse(request.body);
+        const newTask = await db
+          .insert(task)
+          .values({
+            ...parsed,
+            userId: request.user.id,
+            priorityLevel: "medium",
+          })
+          .returning();
 
-      reply.code(201).send(newTask[0]);
-    } catch (err) {
-      if (err instanceof z.ZodError)
-        return reply.code(400).send({ errors: err });
-      reply.code(500).send({ error: "Failed to create task", details: err });
+        reply.code(201).send(newTask[0]);
+      } catch (err) {
+        if (err instanceof z.ZodError)
+          return reply.code(400).send({ errors: err });
+        reply.code(500).send({ error: "Failed to create task", details: err });
+      }
     }
-  });
+  );
 
   fastify.put("/tasks/:id", async (request, reply) => {
     try {
