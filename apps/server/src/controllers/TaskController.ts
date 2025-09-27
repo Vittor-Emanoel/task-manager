@@ -16,9 +16,7 @@ export const createTaskSchema = z.object({
   }, z.date().optional()),
 });
 
-export const updateTaskSchema = createTaskSchema.extend({
-  id: z.uuid("Invalid task ID"),
-});
+export const updateTaskSchema = createTaskSchema;
 
 export async function taskRoutes(fastify: FastifyInstance) {
   fastify.get(
@@ -80,29 +78,36 @@ export async function taskRoutes(fastify: FastifyInstance) {
     }
   );
 
-  fastify.put("/tasks/:id", async (request, reply) => {
-    try {
-      const { id } = request.params as { id: string };
-      const parsed = updateTaskSchema.parse({
-        ...(request.body as object),
-        id,
-      });
+  fastify.put(
+    "/tasks/:id",
+    {
+      preHandler: [authMiddleware],
+    },
+    async (request, reply) => {
+      try {
+        const { id } = request.params as { id: string };
+        const parsed = updateTaskSchema.parse(request.body);
 
-      const updated = await db
-        .update(task)
-        .set(parsed)
-        .where(and(eq(task.id, id), eq(task.userId, request.user.id)))
-        .returning();
+        const [updatedTask] = await db
+          .update(task)
+          .set(parsed)
+          .where(and(eq(task.id, id), eq(task.userId, request.user.id)))
+          .returning();
 
-      if (!updated.length)
-        return reply.code(404).send({ error: "Task not found" });
-      reply.send(updated[0]);
-    } catch (err) {
-      if (err instanceof z.ZodError)
-        return reply.code(400).send({ errors: err });
-      reply.code(500).send({ error: "Failed to update task", details: err });
+        if (!updatedTask) {
+          return reply.code(404).send({ error: "Task not found" });
+        }
+
+        reply.send(updatedTask);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return reply.code(400).send({ errors: error });
+        }
+
+        reply.code(500).send({ message: "Failed to update task", error });
+      }
     }
-  });
+  );
 
   fastify.delete("/tasks/:id", async (request, reply) => {
     try {

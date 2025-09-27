@@ -18,9 +18,7 @@ const fastify = Fastify({
   logger: true,
 });
 
-console.log("aqui");
 fastify.register(fastifyCors, baseCorsConfig);
-console.log("aqui 2");
 fastify.register(categoriesRoutes, { prefix: "/categories" });
 fastify.register(authRoutes);
 fastify.register(taskRoutes);

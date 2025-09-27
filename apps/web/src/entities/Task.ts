@@ -3,6 +3,7 @@ export interface Task {
   title: string;
   categoryId: string;
   description?: string;
-  status?: "pending" | "in_progress" | "done";
+  status?: "completed" | "pending" | "deleted";
   priority?: "high" | "medium" | "low";
+  finishedAt?: Date;
 }

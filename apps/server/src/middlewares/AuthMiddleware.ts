@@ -11,8 +11,6 @@ export async function authMiddleware(
       headers: fromNodeHeaders(request.raw.headers),
     });
 
-    console.log(session);
-
     if (!session) {
       reply.code(401).send({ error: "Unauthorized" });
       return;

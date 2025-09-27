@@ -1,18 +1,12 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { CreateTaskModal } from "@/components/createTaskModal";
+import { TaskCard } from "@/components/task-card";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -27,26 +21,35 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import type { Task } from "@/entities/Task";
 import { useTasks } from "@/hooks/useTasks";
+import { taskService } from "@/services/taskService";
+import { useMutation } from "@tanstack/react-query";
 
 import { Search } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { useDeferredValue, useMemo } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 
 ///TODO: criar loading state container/empty search, ajustar toggle/ prorioridade etc.
 ///TODO: quebrar esse componente
 export const Dashboard = () => {
-  const [searchTerm, setSearchTerm] = useQueryState("task_title", { defaultValue: "" });
-  const deferredQuery = useDeferredValue(searchTerm)
+  const [searchTerm, setSearchTerm] = useQueryState("task_title", {
+    defaultValue: "",
+  });
+  const deferredQuery = useDeferredValue(searchTerm);
   const { tasks, isLoading: isTasksLoading } = useTasks();
+  const [checked, setChecked] = useState(false);
+  const { mutateAsync } = useMutation({
+    mutationFn: async (params: Task) => await taskService.update(params),
+  });
 
   const tasksFiltered = useMemo(() => {
-    return searchTerm.length === 0 ? tasks : tasks.filter((task) =>
-      task.title.toLowerCase().startsWith(deferredQuery)
-    )
-  }, [searchTerm, tasks])
-
-
+    return searchTerm.length === 0
+      ? tasks
+      : tasks.filter((task) =>
+          task.title.toLowerCase().startsWith(deferredQuery)
+        );
+  }, [searchTerm, tasks]);
 
   return (
     <SidebarProvider>
@@ -131,29 +134,7 @@ export const Dashboard = () => {
                 <p>carregando</p>
               ) : (
                 tasksFiltered?.map((task) => (
-                  <Card key={task.id}>
-                    <CardHeader>
-                      <div className="flex items-center gap-3">
-                        <Checkbox
-                          checked={task.status === "done"}
-                        // onCheckedChange={(checked) => { }}
-                        />
-                        <div className="flex flex-col">
-                          <CardTitle
-                            className={
-                              task.status === "done"
-                                ? "line-through text-gray-400"
-                                : ""
-                            }
-                          >
-                            {task.title}
-                          </CardTitle>
-                          <CardDescription>{task.description}</CardDescription>
-                        </div>
-                      </div>
-                      {/* <CardAction>Ação</CardAction> */}
-                    </CardHeader>
-                  </Card>
+                  <TaskCard key={task.id} task={task} />
                 ))
               )}
             </div>

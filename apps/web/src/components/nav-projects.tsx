@@ -1,12 +1,6 @@
-"use client"
+"use client";
 
-import {
-  Edit,
-  MoreHorizontal,
-  Plus,
-  Trash2,
-  type LucideIcon,
-} from "lucide-react";
+import { Edit, MoreHorizontal, Plus, Trash2 } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -24,21 +18,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useCategories } from "@/hooks/useCategories";
 
-interface Category {
-  name: string;
-  url: string;
-  icon: LucideIcon;
-  color?: string;
-  count?: number;
-}
-
-interface NavCategoriesProps {
-  categories: Category[];
-}
-
-export function NavCategories({ categories }: NavCategoriesProps) {
-  const { isMobile } = useSidebar()
+export function NavCategories() {
+  const { isMobile } = useSidebar();
+  const { categories } = useCategories();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -47,18 +31,12 @@ export function NavCategories({ categories }: NavCategoriesProps) {
         {categories.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <div 
-                  className="w-2 h-2 rounded-full mr-2" 
-                  style={{ backgroundColor: item.color || '#6b7280' }}
+              <a>
+                <div
+                  className="w-2 h-2 rounded-full mr-2"
+                  style={{ backgroundColor: item.color || "#6b7280" }}
                 />
-                <item.icon />
                 <span>{item.name}</span>
-                {item.count !== undefined && (
-                  <span className="ml-auto text-xs bg-muted px-2 py-1 rounded-full">
-                    {item.count}
-                  </span>
-                )}
               </a>
             </SidebarMenuButton>
             <DropdownMenu>
@@ -94,5 +72,5 @@ export function NavCategories({ categories }: NavCategoriesProps) {
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }

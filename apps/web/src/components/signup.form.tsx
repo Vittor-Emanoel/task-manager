@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { GalleryVerticalEnd } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Logo } from "./logo";
 
 export const SignupForm = () => {
   // const router = useRouter();
@@ -62,16 +62,23 @@ export const SignupForm = () => {
               className="flex flex-col items-center gap-2 font-medium"
             >
               <div className="flex size-8 items-center justify-center rounded-md">
-                <GalleryVerticalEnd className="size-6" />
+                {/* <GalleryVerticalEnd className="size-6" /> */}
+                <Logo />
               </div>
               <span className="sr-only">Acme Inc.</span>
             </a>
             <h1 className="text-xl font-bold">
-              Bem vindo ao <span className="text-sky-500">Task.IA</span>
+              Bem vindo ao{" "}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r  from-[#FF001F] to-[#18A0FB]">
+                Task.IA
+              </span>
             </h1>
-            <div className="text-center text-sm">
+            <div className="text-center text-sm text-zinc-400">
               Já tem acesso?{" "}
-              <Link to="/login" className="underline underline-offset-4">
+              <Link
+                to="/login"
+                className="underline underline-offset-4 text-zinc-200 "
+              >
                 Entre com a sua conta
               </Link>
             </div>
@@ -118,12 +125,12 @@ export const SignupForm = () => {
             <div className="space-y-2">
               <Label>Senha</Label>
               <Input
-              // id={field.name}
-              // placeholder="Digite sua senha"
-              // name={field.name}
-              // value={field.state.value}
-              // onBlur={field.handleBlur}
-              // onChange={(e) => field.handleChange(e.target.value)}
+                // id={field.name}
+                placeholder="Digite sua senha"
+                // name={field.name}
+                // value={field.state.value}
+                // onBlur={field.handleBlur}
+                // onChange={(e) => field.handleChange(e.target.value)}
               />
 
               {/* {field.state.meta.errors.map((error) => (
@@ -136,6 +143,7 @@ export const SignupForm = () => {
             <Button
               type="submit"
               className="w-full"
+              disabled
               // disabled={!state.canSubmit || state.isSubmitting}
             >
               {/* {state.isSubmitting ? "Submitting..." : "Sign Up"} */}
