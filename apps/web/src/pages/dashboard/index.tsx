@@ -1,20 +1,17 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { CreateTaskModal } from "@/components/createTaskModal";
-import { TaskCard } from "@/components/task-card";
+import { TaskItem } from "@/components/task-card";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
-import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -25,31 +22,49 @@ import type { Task } from "@/entities/Task";
 import { useTasks } from "@/hooks/useTasks";
 import { taskService } from "@/services/taskService";
 import { useMutation } from "@tanstack/react-query";
+import { ChevronDown, LayoutDashboardIcon, ListIcon } from "lucide-react";
 
-import { Search } from "lucide-react";
-import { useQueryState } from "nuqs";
-import { useDeferredValue, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useMemo, useState } from "react";
 
-///TODO: criar loading state container/empty search, ajustar toggle/ prorioridade etc.
-///TODO: quebrar esse componente
+function formatDate(date: Date = new Date()) {
+  const hoje = new Date();
+  const isHoje =
+    date.getDate() === hoje.getDate() &&
+    date.getMonth() === hoje.getMonth() &&
+    date.getFullYear() === hoje.getFullYear();
+
+  const mesDia = new Intl.DateTimeFormat("pt-BR", {
+    month: "short",
+    day: "numeric",
+  })
+    .format(date)
+    .replace(".", "");
+
+  const diaSemana = new Intl.DateTimeFormat("pt-BR", {
+    weekday: "long",
+  }).format(date);
+
+  return `${mesDia} ‧ ${isHoje ? "Hoje ‧ " : ""}${diaSemana}`;
+}
+
 export const Dashboard = () => {
-  const [searchTerm, setSearchTerm] = useQueryState("task_title", {
-    defaultValue: "",
-  });
-  const deferredQuery = useDeferredValue(searchTerm);
   const { tasks, isLoading: isTasksLoading } = useTasks();
-  const [checked, setChecked] = useState(false);
   const { mutateAsync } = useMutation({
     mutationFn: async (params: Task) => await taskService.update(params),
   });
 
-  const tasksFiltered = useMemo(() => {
-    return searchTerm.length === 0
-      ? tasks
-      : tasks.filter((task) =>
-          task.title.toLowerCase().startsWith(deferredQuery)
-        );
-  }, [searchTerm, tasks]);
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+
+  /// TODO> da para melhorar isso!
+  const tasksByStatus = useMemo(() => {
+    const groups: Record<string, Task[]> = {};
+    tasks.forEach((t) => {
+      if (!groups[t?.status]) groups[t?.status] = [];
+      groups[t?.status].push(t);
+    });
+    return groups;
+  }, [tasks]);
 
   return (
     <SidebarProvider>
@@ -65,80 +80,85 @@ export const Dashboard = () => {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#"></BreadcrumbLink>
+                  <BreadcrumbLink href="#">Tarefas</BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
+
         <div className="flex flex-1 flex-col gap-6 p-6 pt-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-bold text-white">
-                Gerenciador de tarefas
-              </h1>
-              <p className="text-gray-400 text-sm">
-                Crie suas tarefas e deixe a IA organizá-las para você.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
+            <div className="w-full flex gap-2 justify-end">
               <CreateTaskModal />
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+              >
+                <ListIcon className="size-4" />
+              </Button>
+              <Button
+                variant={viewMode === "kanban" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("kanban")}
+              >
+                <LayoutDashboardIcon className="size-4" />
+              </Button>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="*:not-first:mt-2 flex-1">
-              <div className="relative ">
-                <Input
-                  id={"a"}
-                  className="peer ps-9"
-                  placeholder="Busque por titulo..."
-                  type="email"
-                  onChange={({ target }) => setSearchTerm(target.value)}
-                />
-                <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
-                  <Search size={16} aria-hidden="true" />
+          {viewMode === "list" ? (
+            <Collapsible defaultOpen>
+              <CollapsibleTrigger className="group mb-4 w-full text-left">
+                <div className="flex items-center gap-2 text-sm">
+                  <ChevronDown className="transition group-data-[state=open]:rotate-180 size-5" />
+                  {formatDate()}
                 </div>
-              </div>
-            </div>
+                <Separator className="mt-2" />
+              </CollapsibleTrigger>
 
-            <div className="flex gap-2">
-              <Select value={"1"}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Todos</SelectItem>
-                  <SelectItem value="2">Pendente</SelectItem>
-                  <SelectItem value="3">Em progresso</SelectItem>
-                  <SelectItem value="3">Completo</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={"1"}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Alta</SelectItem>
-                  <SelectItem value="2">Media</SelectItem>
-                  <SelectItem value="3">Baixa</SelectItem>
-                </SelectContent>
-              </Select>
+              <CollapsibleContent>
+                <div className="flex flex-col gap-4 overflow-y-auto">
+                  {isTasksLoading ? (
+                    <p>Carregando...</p>
+                  ) : (
+                    tasks?.map((task) => (
+                      <TaskItem
+                        key={task.id}
+                        task={task}
+                        handleCheckTask={() => mutateAsync(task)}
+                      />
+                    ))
+                  )}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 overflow-x-auto">
+              {["pending", "completed", "deleted"].map((status) => (
+                <div
+                  key={status}
+                  className="flex flex-col gap-3 rounded-lg border p-3 bg-muted/30"
+                >
+                  <h3 className="font-medium capitalize mb-2">{status}</h3>
+                  {tasksByStatus[status]?.length ? (
+                    tasksByStatus[status].map((task) => (
+                      <TaskItem
+                        key={task.id}
+                        task={task}
+                        handleCheckTask={() => mutateAsync(task)}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Nenhuma tarefa
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
-          </div>
-
-          <div className="flex flex-col gap-4 overflow-y-auto">
-            <div className="flex flex-col gap-4 overflow-y-auto">
-              {isTasksLoading ? (
-                <p>carregando</p>
-              ) : (
-                tasksFiltered?.map((task) => (
-                  <TaskCard key={task.id} task={task} />
-                ))
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>

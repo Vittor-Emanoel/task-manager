@@ -1,69 +1,141 @@
-import type { Task } from "@/entities/Task";
-import { taskService } from "@/services/taskService";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Checkbox } from "./ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
+import { Trash } from "lucide-react";
 
-interface ITaskCardProps {
-  task: Task;
-}
-
-export const TaskCard = ({ task }: ITaskCardProps) => {
-  const queryClient = useQueryClient();
-  const { mutateAsync } = useMutation({
-    mutationFn: async (params: Task) => await taskService.update(params),
-    onMutate: async (updatedTask) => {
-      await queryClient.cancelQueries({ queryKey: ["tasks"] });
-
-      const previousTasks = queryClient.getQueryData<Task[]>(["tasks"]);
-
-      if (previousTasks) {
-        queryClient.setQueryData<Task[]>(
-          ["tasks"],
-          (old) =>
-            old?.map((t) => (t.id === updatedTask.id ? updatedTask : t)) ?? []
-        );
-      }
-
-      return { previousTasks };
-    },
-    onError: (_err, _newTask, context) => {
-      if (context?.previousTasks) {
-        queryClient.setQueryData(["tasks"], context.previousTasks);
-      }
-    },
-  });
-
-  const handleCheckTask = async (checked: boolean) => {
-    await mutateAsync({
-      ...task,
-      status: checked ? "completed" : "pending",
-      finishedAt: checked ? new Date() : undefined,
-    });
+type Task = {
+  id: string;
+  title: string;
+  description?: string;
+  status?: "completed" | "pending" | "deleted";
+  priorityLevel?: "high" | "medium" | "low";
+  category?: {
+    id: string;
+    name: string;
+    color?: string;
   };
+  assignedUser?: {
+    name: string;
+    avatarUrl?: string;
+  };
+};
 
+export function TaskItem({
+  task,
+  handleCheckTask,
+}: {
+  task: Task;
+  handleCheckTask: (checked: boolean) => void;
+}) {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <Checkbox
-            checked={task.status === "completed"}
-            onCheckedChange={(checked) => handleCheckTask(!!checked)}
-          />
-          <div className="flex flex-col">
-            <CardTitle
-              className={
-                task.status === "completed" ? "line-through text-gray-400" : ""
-              }
-            >
-              {task.title}
-            </CardTitle>
-            {task.description && (
-              <CardDescription>{task.description}</CardDescription>
+    <Card
+      className={cn(
+        "group relative flex items-start gap-3 rounded-2xl border p-4 transition-colors",
+        task.status === "completed"
+          ? "bg-gray-50 text-gray-400"
+          : "hover:border-gray-300"
+      )}
+    >
+      <Checkbox
+        checked={task.status === "completed"}
+        onCheckedChange={(checked) => handleCheckTask(!!checked)}
+        className="mt-1 size-5 shrink-0 rounded-md transition-all data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
+      />
+
+      <div className="flex flex-col flex-1">
+        <div className="flex items-center gap-2">
+          <CardTitle
+            className={cn(
+              "text-base font-medium transition-colors",
+              task.status === "completed" && "line-through text-gray-400"
             )}
-          </div>
+          >
+            {task.title}
+          </CardTitle>
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-xs capitalize",
+              task.status === "completed" && "border-green-500 text-green-600",
+              task.status === "pending" && "border-yellow-500 text-yellow-600",
+              task.status === "deleted" && "border-red-500 text-red-600"
+            )}
+          >
+            {task.status}
+          </Badge>
         </div>
-      </CardHeader>
+
+        {task.description && (
+          <CardDescription
+            className={cn(
+              "text-sm transition-colors",
+              task.status === "completed" && "text-gray-300"
+            )}
+          >
+            {task.description}
+          </CardDescription>
+        )}
+
+        <div className="mt-2 flex items-center gap-3 text-sm">
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={"https://github.com/Vittor-emanoel.png"} />
+
+            {/* {task.assignedUser.avatarUrl ? (
+                  <AvatarImage src={task.assignedUser.avatarUrl} />
+                ) : (
+                  <AvatarFallback>
+                    {task.assignedUser.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                )} */}
+          </Avatar>
+          {task.assignedUser && (
+            <div className="flex items-center gap-1">
+              <Avatar className="h-6 w-6">
+                {task.assignedUser.avatarUrl ? (
+                  <AvatarImage src={task.assignedUser.avatarUrl} />
+                ) : (
+                  <AvatarFallback>
+                    {task.assignedUser.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <span className="text-gray-500">{task.assignedUser.name}</span>
+            </div>
+          )}
+
+          {/* Prioridade */}
+          <Badge
+            className={cn(
+              "text-xs capitalize",
+              task.priorityLevel === "high" && "bg-red-100 text-red-700",
+              task.priorityLevel === "medium" &&
+                "bg-yellow-100 text-yellow-700",
+              task.priorityLevel === "low" && "bg-green-100 text-green-700"
+            )}
+          >
+            {task.priorityLevel}
+          </Badge>
+
+          {task.category && (
+            <Badge
+              className="text-xs"
+              style={{
+                backgroundColor: task.category.color || "#e5e7eb", // fallback gray
+                color: "#fff",
+              }}
+            >
+              {task.category.name}
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Botão de ação rápida */}
+      <button className="absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100">
+        <Trash className="h-4 w-4 text-gray-400 hover:text-red-500" />
+      </button>
     </Card>
   );
-};
+}

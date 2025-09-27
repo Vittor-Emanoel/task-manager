@@ -4,7 +4,7 @@ import { taskService } from "@/services/taskService";
 import type { CreateTaskParams } from "@/services/taskService/create";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCheckIcon, PlusCircle } from "lucide-react";
+import { CheckCheckIcon, PlusIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -29,7 +29,6 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 
-
 const createTaskSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
@@ -39,33 +38,38 @@ const createTaskSchema = z.object({
 type FormData = z.infer<typeof createTaskSchema>;
 
 export const CreateTaskModal = () => {
-  const [openModal, setOpenModal] = useState(false)
+  const [openModal, setOpenModal] = useState(false);
   const { categories } = useCategories();
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const { mutateAsync } = useMutation({
     mutationFn: async (data: CreateTaskParams) => {
       return taskService.create(data);
     },
     onMutate: async (newTask) => {
-      await queryClient.cancelQueries({ queryKey: ['tasks'] });
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
 
-      const previousTasks = queryClient.getQueryData<CreateTaskParams[]>(['tasks']);
+      const previousTasks = queryClient.getQueryData<CreateTaskParams[]>([
+        "tasks",
+      ]);
 
-      queryClient.setQueryData<Task[]>(['tasks'], (old = []) => [...old, { ...newTask, id: 'temp-id' }]);
+      queryClient.setQueryData<Task[]>(["tasks"], (old = []) => [
+        ...old,
+        { ...newTask, id: "temp-id" },
+      ]);
 
       return { previousTasks };
     },
     onError: (_err, _newTask, context) => {
       if (context?.previousTasks) {
-        queryClient.setQueryData(['tasks'], context.previousTasks);
+        queryClient.setQueryData(["tasks"], context.previousTasks);
       }
-      toast.error('Erro ao criar tarefa!');
+      toast.error("Erro ao criar tarefa!");
     },
     onSuccess: () => {
-      toast.success('Tarefa criada com sucesso!');
+      toast.success("Tarefa criada com sucesso!");
       setOpenModal(false);
-    }
+    },
   });
 
   const { handleSubmit, register, control, formState, reset } = useForm({
@@ -79,22 +83,20 @@ export const CreateTaskModal = () => {
   const handleCreateTask = useCallback(async (formData: FormData) => {
     try {
       await mutateAsync(formData);
-      toast.success('Tarefa criada com sucesso!')
-      reset()
-      setOpenModal(false)
+      toast.success("Tarefa criada com sucesso!");
+      reset();
+      setOpenModal(false);
     } catch (error) {
-      toast.error('Erro ao criar tarefa!')
+      toast.error("Erro ao criar tarefa!");
     }
   }, []);
 
   return (
     <Dialog open={openModal} onOpenChange={(state) => setOpenModal(state)}>
-      <DialogTrigger className="w-full" asChild>
-        <Button onClick={() => setOpenModal(true)}>
-          <div className="flex items-center gap-2">
-            Nova tarefa
-            <PlusCircle />
-          </div>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={() => setOpenModal(true)}>
+          <PlusIcon />
+          Adicionar tarefa
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
@@ -147,7 +149,12 @@ export const CreateTaskModal = () => {
             </div>
 
             <div className="flex items-center gap-4 justify-between">
-              <Button type="button" className="flex-1" variant="outline" onClick={() => setOpenModal(false)}>
+              <Button
+                type="button"
+                className="flex-1"
+                variant="outline"
+                onClick={() => setOpenModal(false)}
+              >
                 Cancelar
               </Button>
               <Button
