@@ -1,0 +1,1 @@
+ALTER TABLE "task" RENAME COLUMN "created_at" TO "completion_date";

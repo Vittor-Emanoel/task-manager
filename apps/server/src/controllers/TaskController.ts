@@ -5,12 +5,14 @@ import { and, eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 
+
 export const createTaskSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(1, "'title' is required"),
   description: z.string().optional(),
   status: z.enum(["completed", "pending", "deleted"]).optional(),
   priorityLevel: z.enum(["high", "medium", "low"]).optional(),
-  categoryId: z.uuid("Invalid category ID").optional(),
+  assignedUserId: z.uuid("'assignmentId' uuid invalid").optional(),
+  categoryId: z.uuid("'categoryId' uuid invalid").optional(),
   finishedAt: z.preprocess((val) => {
     if (typeof val === "string" || val instanceof Date) return new Date(val);
   }, z.date().optional()),
@@ -29,7 +31,7 @@ export async function taskRoutes(fastify: FastifyInstance) {
         const tasks = await db
           .select()
           .from(task)
-          .where(eq(task.userId, request.user.id));
+          .where(eq(task.creatorUserId, request.user.id));
         reply.send(tasks);
       } catch (err) {
         reply.code(500).send({ error: "Failed to fetch tasks", details: err });
@@ -43,7 +45,7 @@ export async function taskRoutes(fastify: FastifyInstance) {
       const singleTask = await db
         .select()
         .from(task)
-        .where(and(eq(task.userId, request.user.id), eq(task.id, id)));
+        .where(and(eq(task.creatorUserId, request.user.id), eq(task.id, id)));
 
       if (!singleTask) return reply.code(404).send({ error: "Task not found" });
       reply.send(singleTask);
@@ -64,7 +66,7 @@ export async function taskRoutes(fastify: FastifyInstance) {
           .insert(task)
           .values({
             ...parsed,
-            userId: request.user.id,
+            creatorUserId: request.user.id,
             priorityLevel: "medium",
           })
           .returning();
@@ -91,7 +93,7 @@ export async function taskRoutes(fastify: FastifyInstance) {
         const [updatedTask] = await db
           .update(task)
           .set(parsed)
-          .where(and(eq(task.id, id), eq(task.userId, request.user.id)))
+          .where(and(eq(task.id, id), eq(task.creatorUserId, request.user.id)))
           .returning();
 
         if (!updatedTask) {
@@ -114,7 +116,7 @@ export async function taskRoutes(fastify: FastifyInstance) {
       const { id } = request.params as { id: string };
       const deleted = await db
         .delete(task)
-        .where(and(eq(task.id, id), eq(task.userId, request.user.id)))
+        .where(and(eq(task.id, id), eq(task.creatorUserId, request.user.id)))
         .returning();
 
       if (!deleted.length)

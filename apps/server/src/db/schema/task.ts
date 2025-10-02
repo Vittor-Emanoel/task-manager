@@ -34,9 +34,12 @@ export const task = pgTable("task", {
   priorityLevel: taskPriorityLevelEnum().notNull().default("low"),
 
   finishedAt: timestamp("finished_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  userId: uuid("user_id").references(() => user.id),
+
+  assignedUserId: uuid("assigned_user_id").references(() => user.id),
+  creatorUserId: uuid("creator_user_id").references(() => user.id),
   categoryId: uuid("category_id").references(() => category.id),
+
+  completionDate: timestamp("completion_date").notNull(),
 });
 
 export const notification = pgTable("notification", {
