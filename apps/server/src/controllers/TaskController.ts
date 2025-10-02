@@ -12,6 +12,7 @@ export const createTaskSchema = z.object({
   status: z.enum(["completed", "pending", "deleted"]).optional(),
   priorityLevel: z.enum(["high", "medium", "low"]).optional(),
   assignedUserId: z.uuid("'assignmentId' uuid invalid").optional(),
+  completionDate: z.date(),
   categoryId: z.uuid("'categoryId' uuid invalid").optional(),
   finishedAt: z.preprocess((val) => {
     if (typeof val === "string" || val instanceof Date) return new Date(val);

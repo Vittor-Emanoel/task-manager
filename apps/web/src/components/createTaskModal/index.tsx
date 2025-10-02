@@ -1,14 +1,17 @@
 import type { Task } from "@/entities/Task";
 import { useCategories } from "@/hooks/useCategories";
+import { useUsers } from "@/hooks/useUsers";
 import { taskService } from "@/services/taskService";
 import type { CreateTaskParams } from "@/services/taskService/create";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AvatarFallback } from "@radix-ui/react-avatar";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowDownCircle, ArrowRightCircle, ArrowUpCircle, CheckCheckIcon, CheckCircle, Clock, PlusIcon, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Avatar, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -57,6 +60,7 @@ type FormData = z.infer<typeof createTaskSchema>;
 export const CreateTaskModal = () => {
   const [openModal, setOpenModal] = useState(false);
   const { categories } = useCategories();
+  const { users } = useUsers()
   const queryClient = useQueryClient();
 
   const { mutateAsync } = useMutation({
@@ -112,202 +116,219 @@ export const CreateTaskModal = () => {
   }, []);
 
   return (
-    <Dialog open={openModal} onOpenChange={(state) => setOpenModal(state)}>
+    <Dialog open={openModal} onOpenChange={(state) => setOpenModal(state)} >
       <DialogTrigger asChild>
         <Button variant="outline" onClick={() => setOpenModal(true)}>
           <PlusIcon />
           Adicionar tarefa
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Criar tarefa</DialogTitle>
-          <DialogDescription>Crie sua tarefa simples</DialogDescription>
+          <DialogDescription>Adicione os detalhes da sua nova tarefa</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(handleCreateTask)}>
-          <div className="space-y-4">
-            <Input
-              placeholder="Nome da tarefa"
-              maxLength={255}
-              {...register("title")}
+        <form onSubmit={handleSubmit(handleCreateTask)} className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-4">
+          <div className="md:col-span-2 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Título</Label>
+              <Input
+                id="title"
+                placeholder="Nome da tarefa"
+                maxLength={255}
+                {...register("title")}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Descrição</Label>
+              <Textarea
+                id="description"
+                placeholder="Descrição detalhada (opcional)"
+                rows={6}
+                {...register("description")}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col space-y-4">
+
+            <Controller
+              name="priorityLevel"
+              control={control}
+              defaultValue="medium"
+              render={({ field }) => (
+                <div className="flex flex-col space-y-2">
+                  <Label>Prioridade</Label>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="high">
+                        <div className="flex items-center gap-2">
+                          <ArrowUpCircle className="w-4 h-4 text-red-500" />
+                          <span>Alta</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="medium">
+                        <div className="flex items-center gap-2">
+                          <ArrowRightCircle className="w-4 h-4 text-yellow-500" />
+                          <span>Média</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="low">
+                        <div className="flex items-center gap-2">
+                          <ArrowDownCircle className="w-4 h-4 text-green-500" />
+                          <span>Baixa</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             />
 
-            <Textarea
-              placeholder="Descrição (opcional)"
-              maxLength={255}
-              rows={3}
-              {...register("description")}
+
+            <Controller
+              name="status"
+              control={control}
+              defaultValue="pending"
+              render={({ field }) => (
+                <div className="flex flex-col space-y-2">
+                  <Label>Status</Label>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="completed">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span>Concluído</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="pending">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-yellow-500" />
+                          <span>Pendente</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="deleted">
+                        <div className="flex items-center gap-2">
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                          <span>Excluído</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             />
-            <div className="grid grid-cols-2 gap-4">
-              <Controller
-                name="priorityLevel"
-                control={control}
-                defaultValue="medium"
-                render={({ field }) => (
-                  <div className="flex flex-col space-y-2">
-                    <Label>Prioridade</Label>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="high">
+
+
+            <Controller
+              name="assignedUserId"
+              control={control}
+              render={({ field }) => (
+                <div className="flex flex-col space-y-2">
+                  <Label>Atribuído a</Label>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione um usuário" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users?.map((user) => (
+                        <SelectItem value={user.id} key={user.id}>
                           <div className="flex items-center gap-2">
-                            <ArrowUpCircle className="w-4 h-4 text-red-500" />
-                            <span>Alta</span>
+                            <Avatar className="size-6">
+                              <AvatarImage src={user.image ?? ""} />
+                              <AvatarFallback>CN</AvatarFallback>
+                            </Avatar>
+                            {user.name}
                           </div>
                         </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            />
 
-                        <SelectItem value="medium">
-                          <div className="flex items-center gap-2">
-                            <ArrowRightCircle className="w-4 h-4 text-yellow-500" />
-                            <span>Média</span>
-                          </div>
+
+            <Controller
+              name="categoryId"
+              control={control}
+              render={({ field }) => (
+                <div className="flex flex-col space-y-2">
+                  <Label>Categoria</Label>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione a categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem value={category.id} key={category.id}>
+                          {category.name}
                         </SelectItem>
-
-                        <SelectItem value="low">
-                          <div className="flex items-center gap-2">
-                            <ArrowDownCircle className="w-4 h-4 text-green-500" />
-                            <span>Baixa</span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              />
-
-              <Controller
-                name="status"
-                control={control}
-                defaultValue="pending"
-                render={({ field }) => (
-                  <div className="flex flex-col space-y-2">
-                    <Label>Status</Label>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="completed">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            <span>Concluído</span>
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="pending">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-yellow-500" />
-                            <span>Pendente</span>
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="deleted">
-                          <div className="flex items-center gap-2">
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                            <span>Excluído</span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              />
-            </div>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            />
 
 
-            <div className="grid grid-cols-2 gap-4">
-              <Controller
-                name="assignedUserId"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex flex-col space-y-2">
-                    <Label>Atribuir</Label>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              />
+            <Controller
+              name="completionDate"
+              control={control}
+              render={({ field }) => (
+                <div className="flex flex-col space-y-2">
+                  <Label>Data de Conclusão</Label>
+                  <Input
+                    type="date"
+                    value={field.value.toISOString().split("T")[0]}
+                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                  />
+                </div>
+              )}
+            />
+          </div>
 
 
-              <Controller
-                name="categoryId"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex flex-col space-y-2">
-                    <Label>Categoria</Label>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              />
-            </div>
-
-
-            <div className="flex items-center gap-4 justify-between">
-              <Button
-                type="button"
-                className="flex-1"
-                variant="outline"
-                onClick={() => setOpenModal(false)}
-                  disabled={formState.isSubmitting || formState.isDirty}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1"
-                disabled={formState.isSubmitting || formState.isDirty}
-              >
-                {formState.isSubmitting ? "Criando tarefa..." : "Criar tarefa"}
-                <CheckCheckIcon />
-              </Button>
-            </div>
+          <div className="md:col-span-3 flex justify-end gap-3 border-t pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpenModal(false)}
+              disabled={formState.isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={formState.isSubmitting}
+            >
+              {formState.isSubmitting ? "Criando..." : "Criar tarefa"}
+              <CheckCheckIcon className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </form>
       </DialogContent>
+
     </Dialog>
   );
 };
