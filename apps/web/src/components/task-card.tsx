@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { Trash } from "lucide-react";
 
@@ -11,15 +10,11 @@ type Task = {
   description?: string;
   status?: "completed" | "pending" | "deleted";
   priorityLevel?: "high" | "medium" | "low";
-  category?: {
-    id: string;
-    name: string;
-    color?: string;
-  };
-  assignedUser?: {
-    name: string;
-    avatarUrl?: string;
-  };
+  categoryName: string;
+  categoryColor: string;
+  assignedUserName: string;
+  assignedUserEmail: string;
+  assignedUserAvatarUrl: string;
 };
 
 export function TaskItem({
@@ -32,17 +27,17 @@ export function TaskItem({
   return (
     <Card
       className={cn(
-        "group relative flex items-start gap-3 rounded-2xl border p-4 transition-colors",
-        task.status === "completed"
-          ? "bg-gray-50 text-gray-400"
-          : "hover:border-gray-300"
+        "group relative flex items-start gap-3 rounded-2xl border p-4 transition-colors"
+        // task.status === "completed"
+        //   ? "bg-gray-50 text-gray-400"
+        //   : "hover:border-gray-300"
       )}
     >
-      <Checkbox
+      {/* <Checkbox
         checked={task.status === "completed"}
         onCheckedChange={(checked) => handleCheckTask(!!checked)}
         className="mt-1 size-5 shrink-0 rounded-md transition-all data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
-      />
+      /> */}
 
       <div className="flex flex-col flex-1">
         <div className="flex items-center gap-2">
@@ -80,17 +75,15 @@ export function TaskItem({
 
         <div className="mt-2 flex items-center gap-3 text-sm">
           <Avatar className="h-6 w-6">
-            <AvatarImage src={"https://github.com/Vittor-emanoel.png"} />
-
-            {/* {task.assignedUser.avatarUrl ? (
-                  <AvatarImage src={task.assignedUser.avatarUrl} />
-                ) : (
-                  <AvatarFallback>
-                    {task.assignedUser.name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                )} */}
+            {task.assignedUserAvatarUrl ? (
+              <AvatarImage src={task.assignedUserAvatarUrl} />
+            ) : (
+              <AvatarFallback>
+                {task?.assignedUserName?.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            )}
           </Avatar>
-          {task.assignedUser && (
+          {/* {task.assignedUser && (
             <div className="flex items-center gap-1">
               <Avatar className="h-6 w-6">
                 {task.assignedUser.avatarUrl ? (
@@ -103,7 +96,7 @@ export function TaskItem({
               </Avatar>
               <span className="text-gray-500">{task.assignedUser.name}</span>
             </div>
-          )}
+          )} */}
 
           {/* Prioridade */}
           <Badge
@@ -118,15 +111,15 @@ export function TaskItem({
             {task.priorityLevel}
           </Badge>
 
-          {task.category && (
+          {task.categoryName && (
             <Badge
               className="text-xs"
               style={{
-                backgroundColor: task.category.color || "#e5e7eb", // fallback gray
+                backgroundColor: task.categoryColor || "#e5e7eb",
                 color: "#fff",
               }}
             >
-              {task.category.name}
+              {task.categoryName}
             </Badge>
           )}
         </div>

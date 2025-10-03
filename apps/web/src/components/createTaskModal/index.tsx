@@ -6,7 +6,16 @@ import type { CreateTaskParams } from "@/services/taskService/create";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowDownCircle, ArrowRightCircle, ArrowUpCircle, CheckCheckIcon, CheckCircle, Clock, PlusIcon, Trash2 } from "lucide-react";
+import {
+  ArrowDownCircle,
+  ArrowRightCircle,
+  ArrowUpCircle,
+  CheckCheckIcon,
+  CheckCircle,
+  Clock,
+  PlusIcon,
+  Trash2,
+} from "lucide-react";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -32,9 +41,6 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 
-
-
-
 // finishedAt: timestamp("finished_at"),
 
 // assignedUserId: uuid("assigned_user_id").references(() => user.id),
@@ -47,20 +53,18 @@ const createTaskSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   categoryId: z.uuid(),
-  status: z.enum(["completed", "pending", "deleted"]).default('pending'),
+  status: z.enum(["completed", "pending", "deleted"]).default("pending"),
   priorityLevel: z.enum(["high", "medium", "low"]),
   assignedUserId: z.uuid(),
-  completionDate: z.date()
+  completionDate: z.coerce.date(),
 });
-
-
 
 type FormData = z.infer<typeof createTaskSchema>;
 
 export const CreateTaskModal = () => {
   const [openModal, setOpenModal] = useState(false);
   const { categories } = useCategories();
-  const { users } = useUsers()
+  const { users } = useUsers();
   const queryClient = useQueryClient();
 
   const { mutateAsync } = useMutation({
@@ -98,8 +102,8 @@ export const CreateTaskModal = () => {
       title: "",
       description: "",
       status: "pending",
-      priorityLevel: 'medium',
-      completionDate: new Date()
+      priorityLevel: "medium",
+      completionDate: new Date().toISOString(),
     },
     resolver: zodResolver(createTaskSchema),
   });
@@ -116,7 +120,7 @@ export const CreateTaskModal = () => {
   }, []);
 
   return (
-    <Dialog open={openModal} onOpenChange={(state) => setOpenModal(state)} >
+    <Dialog open={openModal} onOpenChange={(state) => setOpenModal(state)}>
       <DialogTrigger asChild>
         <Button variant="outline" onClick={() => setOpenModal(true)}>
           <PlusIcon />
@@ -126,10 +130,15 @@ export const CreateTaskModal = () => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Criar tarefa</DialogTitle>
-          <DialogDescription>Adicione os detalhes da sua nova tarefa</DialogDescription>
+          <DialogDescription>
+            Adicione os detalhes da sua nova tarefa
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(handleCreateTask)} className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-4">
+        <form
+          onSubmit={handleSubmit(handleCreateTask)}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-4"
+        >
           <div className="md:col-span-2 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">Título</Label>
@@ -153,7 +162,6 @@ export const CreateTaskModal = () => {
           </div>
 
           <div className="flex flex-col space-y-4">
-
             <Controller
               name="priorityLevel"
               control={control}
@@ -161,10 +169,7 @@ export const CreateTaskModal = () => {
               render={({ field }) => (
                 <div className="flex flex-col space-y-2">
                   <Label>Prioridade</Label>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
@@ -193,7 +198,6 @@ export const CreateTaskModal = () => {
               )}
             />
 
-
             <Controller
               name="status"
               control={control}
@@ -201,10 +205,7 @@ export const CreateTaskModal = () => {
               render={({ field }) => (
                 <div className="flex flex-col space-y-2">
                   <Label>Status</Label>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
@@ -233,17 +234,13 @@ export const CreateTaskModal = () => {
               )}
             />
 
-
             <Controller
               name="assignedUserId"
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col space-y-2">
                   <Label>Atribuído a</Label>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione um usuário" />
                     </SelectTrigger>
@@ -265,17 +262,13 @@ export const CreateTaskModal = () => {
               )}
             />
 
-
             <Controller
               name="categoryId"
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col space-y-2">
                   <Label>Categoria</Label>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione a categoria" />
                     </SelectTrigger>
@@ -291,7 +284,6 @@ export const CreateTaskModal = () => {
               )}
             />
 
-
             <Controller
               name="completionDate"
               control={control}
@@ -300,14 +292,29 @@ export const CreateTaskModal = () => {
                   <Label>Data de Conclusão</Label>
                   <Input
                     type="date"
-                    value={field.value.toISOString().split("T")[0]}
-                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                    value={
+                      field.value
+                        ? new Date(
+                            typeof field.value === "string" ||
+                            typeof field.value === "number" ||
+                            field.value instanceof Date
+                              ? field.value
+                              : ""
+                          )
+                            .toISOString()
+                            .split("T")[0]
+                        : ""
+                    }
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value ? new Date(e.target.value) : null
+                      )
+                    }
                   />
                 </div>
               )}
             />
           </div>
-
 
           <div className="md:col-span-3 flex justify-end gap-3 border-t pt-4">
             <Button
@@ -318,17 +325,13 @@ export const CreateTaskModal = () => {
             >
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              disabled={formState.isSubmitting}
-            >
+            <Button type="submit" disabled={formState.isSubmitting}>
               {formState.isSubmitting ? "Criando..." : "Criar tarefa"}
               <CheckCheckIcon className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </form>
       </DialogContent>
-
     </Dialog>
   );
 };

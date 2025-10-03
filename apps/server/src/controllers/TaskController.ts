@@ -1,10 +1,9 @@
 import { db } from "@/db";
-import { task } from "@/db/schema";
+import { category, task, user } from "@/db/schema";
 import { authMiddleware } from "@/middlewares/AuthMiddleware";
 import { and, eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-
 
 export const createTaskSchema = z.object({
   title: z.string().min(1, "'title' is required"),
@@ -12,7 +11,7 @@ export const createTaskSchema = z.object({
   status: z.enum(["completed", "pending", "deleted"]).optional(),
   priorityLevel: z.enum(["high", "medium", "low"]).optional(),
   assignedUserId: z.uuid("'assignmentId' uuid invalid").optional(),
-  completionDate: z.date(),
+  completionDate: z.coerce.date(),
   categoryId: z.uuid("'categoryId' uuid invalid").optional(),
   finishedAt: z.preprocess((val) => {
     if (typeof val === "string" || val instanceof Date) return new Date(val);
@@ -30,8 +29,26 @@ export async function taskRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const tasks = await db
-          .select()
+          .select({
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            status: task.status,
+            priorityLevel: task.priorityLevel,
+            finishedAt: task.finishedAt,
+            assignedUserId: task.assignedUserId,
+            creatorUserId: task.creatorUserId,
+            // categoryId: task.categoryId,
+            categoryName: category.name,
+            categoryColor: category.color,
+            completionDate: task.completionDate,
+            assignedUserName: user.name,
+            assignedUserEmail: user.email,
+            assignedUserAvatarUrl: user.image,
+          })
           .from(task)
+          .leftJoin(user, eq(task.assignedUserId, user.id))
+          .leftJoin(category, eq(task.categoryId, category.id))
           .where(eq(task.creatorUserId, request.user.id));
         reply.send(tasks);
       } catch (err) {
