@@ -1,4 +1,3 @@
-import type { Task } from "@/entities/Task";
 import { useCategories } from "@/hooks/useCategories";
 import { useUsers } from "@/hooks/useUsers";
 import { taskService } from "@/services/taskService";
@@ -32,6 +31,7 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { MinimalTiptap } from "../ui/minimal-tiptap";
 import {
   Select,
   SelectContent,
@@ -39,7 +39,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Textarea } from "../ui/textarea";
 
 // finishedAt: timestamp("finished_at"),
 
@@ -78,10 +77,10 @@ export const CreateTaskModal = () => {
         "tasks",
       ]);
 
-      queryClient.setQueryData<Task[]>(["tasks"], (old = []) => [
-        ...old,
-        { ...newTask, id: "temp-id" },
-      ]);
+      // queryClient.setQueryData<Task[]>(["tasks"], (old = []) => [
+      //   ...old,
+      //   { ...newTask, id: "temp-id" },
+      // ]);
 
       return { previousTasks };
     },
@@ -152,11 +151,17 @@ export const CreateTaskModal = () => {
 
             <div className="space-y-2">
               <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                placeholder="Descrição detalhada (opcional)"
-                rows={6}
-                {...register("description")}
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <MinimalTiptap
+                    content={field.value}
+                    onChange={field.onChange}
+                    placeholder="Start typing your content here..."
+                    className="min-h-[400px]"
+                  />
+                )}
               />
             </div>
           </div>

@@ -1,5 +1,7 @@
 import { dayjs } from "@/lib/dayjs";
 
-export function formatTaskDate(date: Date | string) {
-  return dayjs(date).format("D [de] MMMM [de] YYYY, dddd");
+const DEFAULT_FORMAT = "D [de] MMMM [de] YYYY, dddd";
+
+export function formatTaskDate(date: Date | string, format?: string) {
+  return dayjs(date).format(format ?? DEFAULT_FORMAT);
 }
