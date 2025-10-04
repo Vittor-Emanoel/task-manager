@@ -7,6 +7,7 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -21,33 +22,44 @@ import {
 import type { Task } from "@/entities/Task";
 import { useTasks } from "@/hooks/useTasks";
 import { taskService } from "@/services/taskService";
+import { formatTaskDate } from "@/utils/formatTaskDate";
+import { groupObject } from "@/utils/groupObject";
 import { useMutation } from "@tanstack/react-query";
 import { ChevronDown, LayoutDashboardIcon, ListIcon } from "lucide-react";
+import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { useMemo, useState } from "react";
+import { Card } from "@/components/ui/card";
+import {
+  KanbanBoard,
+  KanbanCard,
+  KanbanCards,
+  KanbanHeader,
+  KanbanProvider,
+} from "@/components/ui/kanban";
+import { Skeleton } from "@/components/ui/skeleton";
 
-function formatDate(date: Date = new Date()) {
-  const hoje = new Date();
-  const isHoje =
-    date.getDate() === hoje.getDate() &&
-    date.getMonth() === hoje.getMonth() &&
-    date.getFullYear() === hoje.getFullYear();
+export function TaskItemSkeleton() {
+  return (
+    <Card className="relative flex items-start gap-3 rounded-2xl border p-4">
+      <div className="flex flex-col flex-1 gap-2">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-4 w-12 rounded-full" />
+        </div>
+        <Skeleton className="h-3 w-2/3" />
 
-  const mesDia = new Intl.DateTimeFormat("pt-BR", {
-    month: "short",
-    day: "numeric",
-  })
-    .format(date)
-    .replace(".", "");
+        <div className="mt-2 flex items-center gap-3">
+          <Skeleton className="h-6 w-6 rounded-full" />
+          <Skeleton className="h-4 w-14 rounded-full" />
+          <Skeleton className="h-4 w-16 rounded-full" />
+          <Skeleton className="h-4 w-20 rounded-full" />
+        </div>
+      </div>
 
-  const diaSemana = new Intl.DateTimeFormat("pt-BR", {
-    weekday: "long",
-  }).format(date);
-
-  return `${mesDia} ‧ ${isHoje ? "Hoje ‧ " : ""}${diaSemana}`;
+      <Skeleton className="absolute right-3 top-3 h-4 w-4 rounded-full" />
+    </Card>
+  );
 }
-
 export const Dashboard = () => {
   const { tasks, isLoading: isTasksLoading } = useTasks();
   const { mutateAsync } = useMutation({
@@ -55,16 +67,13 @@ export const Dashboard = () => {
   });
 
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const tasksByCompletedDate = groupObject(tasks, "completionDate");
 
-  /// TODO> da para melhorar isso!
-  const tasksByStatus = useMemo(() => {
-    const groups: Record<string, Task[]> = {};
-    tasks.forEach((t) => {
-      if (!groups[t?.status]) groups[t?.status] = [];
-      groups[t?.status].push(t);
-    });
-    return groups;
-  }, [tasks]);
+  const kanbanTasks = tasks.map((task) => ({
+    ...task,
+    name: task.title,
+    column: task.status || "pending",
+  }));
 
   return (
     <SidebarProvider>
@@ -109,55 +118,70 @@ export const Dashboard = () => {
           </div>
 
           {viewMode === "list" ? (
-            <Collapsible defaultOpen>
-              <CollapsibleTrigger className="group mb-4 w-full text-left">
-                <div className="flex items-center gap-2 text-sm">
-                  <ChevronDown className="transition group-data-[state=open]:rotate-180 size-5" />
-                  {formatDate()}
-                </div>
-                <Separator className="mt-2" />
-              </CollapsibleTrigger>
+            <>
+              {Object.entries(tasksByCompletedDate).map(([date, tasks]) => (
+                <Collapsible key={date} defaultOpen>
+                  <CollapsibleTrigger className="group mb-4 w-full text-left">
+                    <div className="flex items-center gap-2 text-sm">
+                      <ChevronDown className="transition group-data-[state=open]:rotate-180 size-5" />
+                      {formatTaskDate(new Date(date))}
+                    </div>
+                    <Separator className="mt-2" />
+                  </CollapsibleTrigger>
 
-              <CollapsibleContent>
-                <div className="flex flex-col gap-4 overflow-y-auto">
-                  {isTasksLoading ? (
-                    <p>Carregando...</p>
-                  ) : (
-                    tasks?.map((task) => (
-                      <TaskItem
-                        key={task.id}
-                        task={task}
-                        handleCheckTask={() => mutateAsync(task)}
-                      />
-                    ))
-                  )}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 overflow-x-auto">
-              {["pending", "completed", "deleted"].map((status) => (
-                <div
-                  key={status}
-                  className="flex flex-col gap-3 rounded-lg border p-3 bg-muted/30"
-                >
-                  <h3 className="font-medium capitalize mb-2">{status}</h3>
-                  {tasksByStatus[status]?.length ? (
-                    tasksByStatus[status].map((task) => (
-                      <TaskItem
-                        key={task.id}
-                        task={task}
-                        handleCheckTask={() => mutateAsync(task)}
-                      />
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Nenhuma tarefa
-                    </p>
-                  )}
-                </div>
+                  <CollapsibleContent>
+                    <div className="flex flex-col gap-4 overflow-y-auto">
+                      {isTasksLoading
+                        ? [...Array(3)].map((_, i) => (
+                            <TaskItemSkeleton key={i} />
+                          ))
+                        : tasks.map((task) => (
+                            <TaskItem key={task.id} task={task} />
+                          ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               ))}
-            </div>
+            </>
+          ) : (
+            <KanbanProvider
+              columns={[
+                { id: "pending", name: "Pendentes", color: "#FBBF24" },
+                { id: "completed", name: "Completadas", color: "#10B981" },
+                { id: "deleted", name: "Deletadas", color: "#EF4444" },
+              ]}
+              data={kanbanTasks}
+              onDataChange={(newData) => {
+                const updatedTasks: Task[] = newData.map((item) => {
+                  const originalTask = tasks.find((t) => t.id === item.id);
+                  if (!originalTask) return item as Task;
+                  return {
+                    ...originalTask,
+                    status: item.column as "pending" | "completed" | "deleted",
+                  };
+                });
+              }}
+            >
+              {(column) => (
+                <KanbanBoard key={column.id} id={column.id}>
+                  <KanbanHeader>{column.name}</KanbanHeader>
+                  <KanbanCards id={column.id}>
+                    {(kanbanItem) => {
+                      const fullTask = tasks.find(
+                        (t) => t.id === kanbanItem.id
+                      );
+                      if (!fullTask) return null;
+
+                      return (
+                        <KanbanCard key={fullTask.id} {...kanbanItem}>
+                          <TaskItem task={fullTask} />
+                        </KanbanCard>
+                      );
+                    }}
+                  </KanbanCards>
+                </KanbanBoard>
+              )}
+            </KanbanProvider>
           )}
         </div>
       </SidebarInset>
